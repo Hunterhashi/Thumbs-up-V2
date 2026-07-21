@@ -1,0 +1,37 @@
+---
+description: Senior Flutter/Dart guardrails (lifecycle, responsive UI, performance, strict typing)
+alwaysApply: true
+---
+
+# Flutter / Dart “Senior” Standards
+
+Build maintainable, modular Flutter code with strict typing and lifecycle safety.
+
+## Architecture & separation of concerns
+
+- Keep widget trees lean; extract logic into helpers/services/models when it improves clarity
+- Avoid dumping unrelated code into one file; keep files focused and reasonably small
+
+## Responsive UI (no hardcoded screens)
+
+- Do **not** hardcode screen dimensions
+- Prefer `LayoutBuilder`, `MediaQuery`, and flexible widgets (`Expanded`, `Flexible`) for sizing
+- Use `SafeArea` where needed (notches, insets)
+- Assume keyboard/overlays can change available height
+
+## Lifecycle & memory safety
+
+- Always `dispose()` resources you create (e.g. `TextEditingController`, `AnimationController`, `ScrollController`, `FocusNode`)
+- For async work that updates UI or navigates: guard with `if (!mounted) return;`
+
+## State & performance
+
+- Do **not** trigger `setState` from within build/layout/paint phases
+- Prefer `const` constructors where possible
+- Minimize rebuilds: keep state local, avoid unnecessary listeners, and don’t rebuild large subtrees for small changes
+
+## Strict typing & idiomatic Dart
+
+- Avoid `dynamic` when a concrete model/type makes sense
+- Keep null-safety explicit and idiomatic (`?`, `!`, `??`) and avoid unsafe casts
+- Prefer clear, explicit types over ambiguous `var` when it improves readability/API contracts

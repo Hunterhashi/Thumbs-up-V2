@@ -1,0 +1,33 @@
+---
+description: Run lint/tests, match existing patterns, add tests when it makes sense
+alwaysApply: true
+---
+
+# Quality Gates
+
+Deterministic checks matter more with AI-generated code, not less.
+
+## After making changes
+
+1. Run the project's **lint**, **typecheck**, and **tests** for the affected area
+2. Fix issues you introduced before finishing
+3. Report what you ran and the result
+
+## Tests
+
+- When fixing a bug or adding behavior: add or update tests **if the project has a test pattern**
+- Copy existing test structure — do not invent a new style from scratch
+- Do not generate shallow or redundant tests just to "have coverage"
+
+## Match the codebase
+
+- Reuse existing components, hooks, utilities, and query patterns
+- Follow naming, logging, and error-handling conventions already in the repo
+- Prefer in-repo examples over generic web patterns
+- If no clear pattern exists in the repo, **ask** instead of inventing one
+
+## Do not
+
+- Skip lint/typecheck because the change "looks fine"
+- Introduce new libraries when an existing one already solves the problem
+- Replace working patterns with AI-preferred alternatives without reason

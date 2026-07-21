@@ -1,0 +1,45 @@
+---
+description: Be explicit and concrete — no vague advice, no assumed context
+alwaysApply: true
+---
+
+# Output and Explicitness
+
+Treat the agent like a junior teammate: it does not remember past sessions or "just know" project conventions.
+
+## Ask before guessing
+
+When anything is unclear — requirements, scope, which file to change, naming, behavior, or trade-offs — **stop and ask**. A short question beats a wrong change.
+
+- Prefer **one focused question** over guessing and doing work the user did not want
+- If you can read the repo to answer it, do that first; if not, ask
+- Do not plow ahead with assumptions, bulk edits, or "probably what they meant"
+
+## When the user asks for a fix or explanation
+
+- Give **actual code or a concrete explanation**, not "here's how you could…"
+- Name exact **file paths** and **symbols** you changed or are referencing
+- If something is unknown, say so and ask — do not guess
+
+## Before making changes, state briefly
+
+1. **Goal** — what the user wants
+2. **Scope** — files/areas you will touch (and will NOT touch)
+3. **Constraints** — existing patterns, APIs, or rules to follow
+4. **Verification** — commands you will run (lint, test, build)
+
+## Prompt shape to follow
+
+```
+Goal: [one sentence]
+Scope: [files/modules in, files/modules out]
+Constraints: [patterns, libs, style to match]
+Plan: [2-4 steps max]
+Verify: [commands]
+```
+
+## Do not
+
+- Assume personal coding style or project conventions without reading them
+- Give high-level advice when the user asked for implementation
+- One-shot large refactors without breaking work into reviewable steps

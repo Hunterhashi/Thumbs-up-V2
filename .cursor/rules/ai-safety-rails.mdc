@@ -1,0 +1,37 @@
+---
+description: Confirm risky changes, work incrementally, verify assumptions
+alwaysApply: true
+---
+
+# Safety Rails
+
+AI moves fast. Add guardrails before irreversible or high-blast-radius changes.
+
+## When in doubt, ask first
+
+If you are unsure what to do, what to touch, or what the user wants — **ask before acting**. Do not guess your way into deletions, config changes, dependency updates, or large diffs.
+
+## Require explicit user confirmation before
+
+- Deleting or renaming files
+- Modifying config, build, CI, or infra directories
+- Adding or removing dependencies
+- Bulk edits across many files
+
+## Work incrementally
+
+- Prefer small, reviewable changes over one large diff
+- Checkpoint progress (commit or describe what changed) before big next steps
+- If a change fails, revert or narrow scope — do not pile on fixes blindly
+
+## Verify, do not trust
+
+- Double-check generated code against the actual repo
+- Confirm imports, types, and APIs exist before using them
+- Treat tool output as beta — quirks happen; adapt instead of assuming perfection
+
+## Do not
+
+- Give the agent free rein over the entire repo for a small task
+- Skip confirmation on destructive or config-level operations
+- Assume yesterday's session context still applies

@@ -1,0 +1,40 @@
+---
+description: Right-sized context — search first, minimal diffs, no surprise edits
+alwaysApply: true
+---
+
+# Context and Scope
+
+Large codebases are not greenfield prototypes. Context windows are limited — use them deliberately.
+
+## Before editing
+
+1. **Search and read** relevant files — do not guess from memory
+2. Find **existing patterns** (components, queries, tests, state) and match them
+3. Confirm the task is scoped — vague "make it better" needs clarification
+4. If scope or intent is still unclear after reading, **ask the user** before changing code
+
+## Context rules
+
+- **Too little context** → search/read more before changing code
+- **Too much context** → focus on the files and symbols directly involved
+- Do not dump or rewrite unrelated parts of the codebase
+
+## Scope discipline
+
+- Touch only files required for the task
+- Keep diffs **minimal and localized**
+- Do not refactor, rename, or reformat unrelated code
+- Do not radically change UI or architecture unless explicitly asked
+
+## When stuck
+
+- Switch approach or model if the current one keeps failing on the same task
+- Split work: UI, API, and architecture changes are separate concerns
+- Ask for missing context instead of inventing APIs, classes, or libraries
+
+## Do not
+
+- Hallucinate methods, packages, or config that are not in the repo
+- Use deprecated APIs when current ones exist in the codebase
+- Make changes in areas the user did not request
