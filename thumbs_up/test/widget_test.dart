@@ -10,5 +10,9 @@ void main() {
       find.textContaining('Thumbs', findRichText: true),
       findsOneWidget,
     );
+
+    // Flush the Launch screen's pending timers (spinner fade-in + the
+    // delayed navigation to Home) so the test doesn't leak them.
+    await tester.pump(const Duration(seconds: 3));
   });
 }
