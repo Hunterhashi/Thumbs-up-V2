@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:thumbs_up/data/phrase_packs.dart';
+import 'package:thumbs_up/l10n/generated/app_localizations.dart';
 import 'package:thumbs_up/lesson/phrase_deck.dart';
 import 'package:thumbs_up/models/difficulty.dart';
 import 'package:thumbs_up/models/phrase_category.dart';
@@ -121,19 +122,20 @@ class _PracticeScreenState extends State<PracticeScreen> {
     final inProgress = _engine.isStarted && !_engine.completed;
     if (!inProgress) return true;
 
+    final l10n = AppLocalizations.of(context);
     final shouldLeave = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Leave practice?'),
-        content: const Text('Your progress on this run will be lost.'),
+        title: Text(l10n.exitDialogTitle),
+        content: Text(l10n.exitDialogContent),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Keep typing'),
+            child: Text(l10n.exitDialogKeepTyping),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Leave'),
+            child: Text(l10n.exitDialogLeave),
           ),
         ],
       ),
@@ -176,7 +178,9 @@ class _PracticeScreenState extends State<PracticeScreen> {
                     children: [
                       const SizedBox(height: 8),
                       PracticeTopBar(
-                        title: widget.difficulty.label,
+                        title: widget.difficulty.label(
+                          AppLocalizations.of(context),
+                        ),
                         onBack: () => _onBack(context),
                         onRestart: _restart,
                         isPaused: isPaused,

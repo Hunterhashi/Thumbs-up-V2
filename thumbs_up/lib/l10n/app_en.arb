@@ -1,0 +1,115 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "Thumbs Up",
+  "@appTitle": {
+    "description": "The app's display name (window/task-switcher title)."
+  },
+
+  "homeHeadline": "Choose Your\nChallenge",
+  "@homeHeadline": {
+    "description": "Home screen headline."
+  },
+  "homeSubtitle": "Pick a difficulty and start typing",
+  "@homeSubtitle": {
+    "description": "Home screen subtitle under the headline."
+  },
+  "settingsTooltip": "Settings",
+  "@settingsTooltip": {
+    "description": "Tooltip for the Home screen's settings icon button."
+  },
+  "comingSoonSnackbar": "{difficulty} (Speed Stream) is coming soon.",
+  "@comingSoonSnackbar": {
+    "description": "Snackbar shown when tapping an unavailable difficulty (Medium/Pro).",
+    "placeholders": {
+      "difficulty": {
+        "type": "String"
+      }
+    }
+  },
+
+  "difficultyEasyLabel": "Easy",
+  "difficultyMediumLabel": "Medium",
+  "difficultyProLabel": "Pro",
+  "difficultyEasySubtitle": "Learn accuracy",
+  "difficultyMediumSubtitle": "Speed Stream",
+  "difficultyProSubtitle": "Speed Stream+",
+  "difficultyEasyDescription": "Short, static phrases · no time pressure",
+  "difficultyMediumDescription": "Comfortable scrolling pace · build rhythm",
+  "difficultyProDescription": "Fast scrolling pace · master speed",
+
+  "difficultySoonBadge": "Soon",
+  "@difficultySoonBadge": {
+    "description": "Small badge on an unavailable (Medium/Pro) difficulty card."
+  },
+  "difficultyBestWpm": "Best: {wpm} WPM",
+  "@difficultyBestWpm": {
+    "description": "Personal-best pill on a difficulty card.",
+    "placeholders": {
+      "wpm": {
+        "type": "int"
+      }
+    }
+  },
+
+  "categoryEverydayLabel": "Everyday",
+  "categoryPunctuationNumbersLabel": "Punctuation & Numbers",
+  "categoryEverydayDescription": "Casual, lowercase sentences",
+  "categoryPunctuationNumbersDescription": "Practice numbers, symbols and punctuation",
+
+  "settingsTitle": "Settings",
+  "settingsSectionPractice": "Practice",
+  "settingsHapticsTitle": "Haptic feedback",
+  "settingsHapticsSubtitle": "Vibrate on correct and incorrect keys",
+  "settingsHudTitle": "Live stats HUD",
+  "settingsHudSubtitle": "Show time, WPM and accuracy while typing",
+  "settingsSectionAppearance": "Appearance",
+  "themeModeSystem": "System",
+  "themeModeLight": "Light",
+  "themeModeDark": "Dark",
+  "settingsSectionLanguage": "Language",
+  "languageSystem": "System",
+  "languageEnglish": "English",
+  "languageGerman": "German",
+
+  "onboardingTitle": "Welcome to Thumbs Up",
+  "onboardingTip1": "Pick a difficulty, then type the highlighted phrase as fast and accurately as you can.",
+  "onboardingTip2": "Correct keys turn green, mistakes turn red — backspace doesn't erase the mistake count.",
+  "onboardingTip3": "Tap the pause button anytime; your personal best is saved automatically.",
+  "onboardingGotIt": "Got it",
+
+  "statsTime": "Time",
+  "statsWpm": "WPM",
+  "statsAccuracy": "Accuracy",
+
+  "resultHeadline": "Nice work!",
+  "resultSummaryLine": "{difficulty} · {category} · {elapsed}",
+  "@resultSummaryLine": {
+    "description": "Results screen subheading: difficulty, category and elapsed time.",
+    "placeholders": {
+      "difficulty": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      },
+      "elapsed": {
+        "type": "String"
+      }
+    }
+  },
+  "resultNewBestBadge": "New personal best",
+  "resultStatMistakes": "Mistakes",
+  "resultStatBackspaces": "Backspaces",
+  "resultNextPhrase": "Next phrase",
+  "resultRepeat": "Repeat",
+  "resultChangeDifficulty": "Change difficulty",
+
+  "exitDialogTitle": "Leave practice?",
+  "exitDialogContent": "Your progress on this run will be lost.",
+  "exitDialogKeepTyping": "Keep typing",
+  "exitDialogLeave": "Leave",
+
+  "pausedTitle": "Paused",
+  "pausedResumeButton": "Resume"
+}

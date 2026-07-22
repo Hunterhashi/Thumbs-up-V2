@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:thumbs_up/l10n/generated/app_localizations.dart';
 import 'package:thumbs_up/theme/app_theme.dart';
 
 /// Full-bleed overlay shown on top of the Practice screen while the run is
@@ -10,6 +11,7 @@ class PracticePausedOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Positioned.fill(
       child: ColoredBox(
         color: Theme.of(
@@ -25,12 +27,15 @@ class PracticePausedOverlay extends StatelessWidget {
                 color: AppColors.brandYellow,
               ),
               const SizedBox(height: 16),
-              Text('Paused', style: Theme.of(context).textTheme.headlineMedium),
+              Text(
+                l10n.pausedTitle,
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
                 onPressed: onResume,
                 icon: const Icon(Icons.play_arrow_rounded),
-                label: const Text('Resume'),
+                label: Text(l10n.pausedResumeButton),
               ),
             ],
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:thumbs_up/l10n/generated/app_localizations.dart';
 import 'package:thumbs_up/models/session_result.dart';
 import 'package:thumbs_up/navigation/app_router.dart';
 import 'package:thumbs_up/screens/widgets/result_stat_card.dart';
@@ -22,6 +23,7 @@ class ResultScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -31,32 +33,35 @@ class ResultScreen extends StatelessWidget {
             children: [
               const SizedBox(height: 32),
               Text(
-                'Nice work!',
+                l10n.resultHeadline,
                 style: Theme.of(context).textTheme.headlineLarge,
               ),
               const SizedBox(height: 4),
               Text(
-                '${result.difficulty.label} · ${result.category.label} · '
-                '${_formatElapsed(result.elapsed)}',
+                l10n.resultSummaryLine(
+                  result.difficulty.label(l10n),
+                  result.category.label(l10n),
+                  _formatElapsed(result.elapsed),
+                ),
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               if (isNewBest) ...[
                 const SizedBox(height: 12),
-                const _NewPersonalBestBadge(),
+                _NewPersonalBestBadge(label: l10n.resultNewBestBadge),
               ],
               const SizedBox(height: 28),
               Row(
                 children: [
                   Expanded(
                     child: ResultStatCard(
-                      label: 'WPM',
+                      label: l10n.statsWpm,
                       value: result.wpm.round().toString(),
                     ),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
                     child: ResultStatCard(
-                      label: 'Accuracy',
+                      label: l10n.statsAccuracy,
                       value: '${result.accuracyPercent.round()}%',
                     ),
                   ),
@@ -67,14 +72,14 @@ class ResultScreen extends StatelessWidget {
                 children: [
                   Expanded(
                     child: ResultStatCard(
-                      label: 'Mistakes',
+                      label: l10n.resultStatMistakes,
                       value: result.mistakes.toString(),
                     ),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
                     child: ResultStatCard(
-                      label: 'Backspaces',
+                      label: l10n.resultStatBackspaces,
                       value: result.backspaces.toString(),
                     ),
                   ),
@@ -89,7 +94,7 @@ class ResultScreen extends StatelessWidget {
                     result.difficulty,
                     result.category,
                   ),
-                  child: const Text('Next phrase'),
+                  child: Text(l10n.resultNextPhrase),
                 ),
               ),
               const SizedBox(height: 12),
@@ -102,7 +107,7 @@ class ResultScreen extends StatelessWidget {
                     result.category,
                     result.phrase,
                   ),
-                  child: const Text('Repeat'),
+                  child: Text(l10n.resultRepeat),
                 ),
               ),
               const SizedBox(height: 4),
@@ -110,7 +115,7 @@ class ResultScreen extends StatelessWidget {
                 width: double.infinity,
                 child: TextButton(
                   onPressed: () => AppRouter.toHome(context),
-                  child: const Text('Change difficulty'),
+                  child: Text(l10n.resultChangeDifficulty),
                 ),
               ),
               const SizedBox(height: 24),
@@ -123,7 +128,9 @@ class ResultScreen extends StatelessWidget {
 }
 
 class _NewPersonalBestBadge extends StatelessWidget {
-  const _NewPersonalBestBadge();
+  const _NewPersonalBestBadge({required this.label});
+
+  final String label;
 
   @override
   Widget build(BuildContext context) {
@@ -143,10 +150,7 @@ class _NewPersonalBestBadge extends StatelessWidget {
             color: AppColors.matteBlack,
           ),
           const SizedBox(width: 6),
-          Text(
-            'New personal best',
-            style: Theme.of(context).textTheme.labelLarge,
-          ),
+          Text(label, style: Theme.of(context).textTheme.labelLarge),
         ],
       ),
     );

@@ -7,21 +7,28 @@ class AppSettings {
     this.hapticsEnabled = true,
     this.hudEnabled = true,
     this.themeMode = ThemeMode.system,
+    this.locale,
   });
 
   final bool hapticsEnabled;
   final bool hudEnabled;
   final ThemeMode themeMode;
 
+  /// Manually chosen UI language, or null to follow the device locale.
+  final Locale? locale;
+
   AppSettings copyWith({
     bool? hapticsEnabled,
     bool? hudEnabled,
     ThemeMode? themeMode,
+    Locale? locale,
+    bool clearLocale = false,
   }) {
     return AppSettings(
       hapticsEnabled: hapticsEnabled ?? this.hapticsEnabled,
       hudEnabled: hudEnabled ?? this.hudEnabled,
       themeMode: themeMode ?? this.themeMode,
+      locale: clearLocale ? null : (locale ?? this.locale),
     );
   }
 }
@@ -39,6 +46,7 @@ class SettingsStore {
   static const String _hapticsKey = 'settings_haptics_enabled';
   static const String _hudKey = 'settings_hud_enabled';
   static const String _themeModeKey = 'settings_theme_mode';
+  static const String _localeKey = 'settings_locale';
 
   static final ValueNotifier<AppSettings> notifier = ValueNotifier(
     const AppSettings(),
@@ -54,6 +62,7 @@ class SettingsStore {
       hapticsEnabled: prefs.getBool(_hapticsKey) ?? true,
       hudEnabled: prefs.getBool(_hudKey) ?? true,
       themeMode: _themeModeFromString(prefs.getString(_themeModeKey)),
+      locale: _localeFromString(prefs.getString(_localeKey)),
     );
   }
 
@@ -75,11 +84,30 @@ class SettingsStore {
     await prefs.setString(_themeModeKey, mode.name);
   }
 
+  /// Sets the manual UI language, or clears it (pass null) to follow the
+  /// device locale again.
+  static Future<void> setLocale(Locale? locale) async {
+    notifier.value = notifier.value.copyWith(
+      locale: locale,
+      clearLocale: locale == null,
+    );
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_localeKey, locale?.languageCode ?? 'system');
+  }
+
   static ThemeMode _themeModeFromString(String? value) {
     return switch (value) {
       'light' => ThemeMode.light,
       'dark' => ThemeMode.dark,
       _ => ThemeMode.system,
+    };
+  }
+
+  static Locale? _localeFromString(String? value) {
+    return switch (value) {
+      'en' => const Locale('en'),
+      'de' => const Locale('de'),
+      _ => null,
     };
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:thumbs_up/l10n/generated/app_localizations.dart';
 import 'package:thumbs_up/theme/app_theme.dart';
 
 /// Live performance HUD shown while typing: elapsed time, WPM, accuracy.
@@ -22,12 +23,16 @@ class LiveStatsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _StatChip(label: 'Time', value: _formatElapsed(elapsed)),
-        _StatChip(label: 'WPM', value: wpm.round().toString()),
-        _StatChip(label: 'Accuracy', value: '${accuracyPercent.round()}%'),
+        _StatChip(label: l10n.statsTime, value: _formatElapsed(elapsed)),
+        _StatChip(label: l10n.statsWpm, value: wpm.round().toString()),
+        _StatChip(
+          label: l10n.statsAccuracy,
+          value: '${accuracyPercent.round()}%',
+        ),
       ],
     );
   }
@@ -54,9 +59,9 @@ class _StatChip extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           label,
-          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: AppColors.appleGray,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.labelLarge?.copyWith(color: AppColors.appleGray),
         ),
       ],
     );

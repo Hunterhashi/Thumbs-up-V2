@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:thumbs_up/l10n/generated/app_localizations.dart';
 import 'package:thumbs_up/models/difficulty.dart';
 import 'package:thumbs_up/theme/app_theme.dart';
 
@@ -20,7 +21,9 @@ class DifficultyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final isAvailable = difficulty.isAvailable;
+    final label = difficulty.label(l10n);
 
     return Material(
       color: Colors.transparent,
@@ -56,7 +59,7 @@ class DifficultyCard extends StatelessWidget {
                 ),
                 alignment: Alignment.center,
                 child: Text(
-                  difficulty.label.substring(0, 1),
+                  label.substring(0, 1),
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
@@ -71,10 +74,7 @@ class DifficultyCard extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Text(
-                          difficulty.label,
-                          style: theme.textTheme.titleLarge,
-                        ),
+                        Text(label, style: theme.textTheme.titleLarge),
                         const SizedBox(width: 8),
                         if (!isAvailable)
                           Container(
@@ -89,7 +89,7 @@ class DifficultyCard extends StatelessWidget {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              'Soon',
+                              l10n.difficultySoonBadge,
                               style: theme.textTheme.labelLarge?.copyWith(
                                 color: AppColors.appleGray,
                               ),
@@ -99,7 +99,7 @@ class DifficultyCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      difficulty.description,
+                      difficulty.description(l10n),
                       style: theme.textTheme.bodyMedium,
                     ),
                     if (bestWpm != null) ...[
@@ -114,7 +114,7 @@ class DifficultyCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          'Best: ${bestWpm!.round()} WPM',
+                          l10n.difficultyBestWpm(bestWpm!.round()),
                           style: theme.textTheme.labelLarge,
                         ),
                       ),

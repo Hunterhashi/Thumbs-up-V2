@@ -1,0 +1,70 @@
+{
+  "@@locale": "de",
+
+  "appTitle": "Thumbs Up",
+
+  "homeHeadline": "Wähle deine\nHerausforderung",
+  "homeSubtitle": "Wähle einen Schwierigkeitsgrad und beginne zu tippen",
+  "settingsTooltip": "Einstellungen",
+  "comingSoonSnackbar": "{difficulty} (Speed Stream) folgt in Kürze.",
+
+  "difficultyEasyLabel": "Leicht",
+  "difficultyMediumLabel": "Mittel",
+  "difficultyProLabel": "Profi",
+  "difficultyEasySubtitle": "Genauigkeit lernen",
+  "difficultyMediumSubtitle": "Speed Stream",
+  "difficultyProSubtitle": "Speed Stream+",
+  "difficultyEasyDescription": "Kurze, feste Sätze · kein Zeitdruck",
+  "difficultyMediumDescription": "Angenehmes Scroll-Tempo · Rhythmus aufbauen",
+  "difficultyProDescription": "Schnelles Scroll-Tempo · Geschwindigkeit meistern",
+
+  "difficultySoonBadge": "Bald",
+  "difficultyBestWpm": "Bestwert: {wpm} WPM",
+
+  "categoryEverydayLabel": "Alltag",
+  "categoryPunctuationNumbersLabel": "Satzzeichen & Zahlen",
+  "categoryEverydayDescription": "Lockere Sätze in Kleinschreibung",
+  "categoryPunctuationNumbersDescription": "Übe Zahlen, Symbole und Satzzeichen",
+
+  "settingsTitle": "Einstellungen",
+  "settingsSectionPractice": "Training",
+  "settingsHapticsTitle": "Haptisches Feedback",
+  "settingsHapticsSubtitle": "Vibration bei richtigen und falschen Tasten",
+  "settingsHudTitle": "Live-Statistik-Anzeige",
+  "settingsHudSubtitle": "Zeit, WPM und Genauigkeit während des Tippens anzeigen",
+  "settingsSectionAppearance": "Erscheinungsbild",
+  "themeModeSystem": "System",
+  "themeModeLight": "Hell",
+  "themeModeDark": "Dunkel",
+  "settingsSectionLanguage": "Sprache",
+  "languageSystem": "System",
+  "languageEnglish": "Englisch",
+  "languageGerman": "Deutsch",
+
+  "onboardingTitle": "Willkommen bei Thumbs Up",
+  "onboardingTip1": "Wähle einen Schwierigkeitsgrad und tippe den hervorgehobenen Satz so schnell und genau wie möglich.",
+  "onboardingTip2": "Richtige Tasten werden grün, Fehler rot — Rückschritt löscht die Fehlerzahl nicht.",
+  "onboardingTip3": "Tippe jederzeit auf Pause; dein persönlicher Bestwert wird automatisch gespeichert.",
+  "onboardingGotIt": "Alles klar",
+
+  "statsTime": "Zeit",
+  "statsWpm": "WPM",
+  "statsAccuracy": "Genauigkeit",
+
+  "resultHeadline": "Gut gemacht!",
+  "resultSummaryLine": "{difficulty} · {category} · {elapsed}",
+  "resultNewBestBadge": "Neue persönliche Bestleistung",
+  "resultStatMistakes": "Fehler",
+  "resultStatBackspaces": "Rückschritte",
+  "resultNextPhrase": "Nächster Satz",
+  "resultRepeat": "Wiederholen",
+  "resultChangeDifficulty": "Schwierigkeit ändern",
+
+  "exitDialogTitle": "Übung verlassen?",
+  "exitDialogContent": "Dein Fortschritt in diesem Durchlauf geht verloren.",
+  "exitDialogKeepTyping": "Weiter tippen",
+  "exitDialogLeave": "Verlassen",
+
+  "pausedTitle": "Pausiert",
+  "pausedResumeButton": "Fortsetzen"
+}

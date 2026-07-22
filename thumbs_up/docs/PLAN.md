@@ -22,7 +22,7 @@
 - [x] Local persistence: personal best per difficulty + one-time onboarding tips
 - [x] Settings (E): haptics on/off, live HUD on/off, theme mode (system/light/dark)
 - [x] Phrase packs / categories (Easy: Everyday + Punctuation & Numbers, picked on Home)
-- [ ] Localization (English + German UI strings + language selector)
+- [x] Localization (English + German UI strings + language selector in Settings; phrase content still English-only)
 - [ ] Sentence library (Tatoeba-based, large EN/DE pool, filtered + attributed)
 - [ ] Medium/Pro "Speed Stream" (treadmill) mode + scoring, speed tuned on-device
 - [ ] Phrase lists + scoring logic per difficulty (beyond the Easy starter list)
@@ -317,3 +317,14 @@ These are captured as always-on Cursor rules now (see `.cursor/rules/flutter-dar
   - Threaded `PhraseCategory` through the run: `PracticeScreen` (new required `category` param, used to pick the deck's phrase pool), `TypingEngine.buildResult`, `SessionResult` (new `category` field), `AppRouter.nextPhrase`/`repeatPhrase` (new `category` param so "Next phrase"/"Repeat" keep using the same pack), and `ResultScreen` (now shows the category in its header line and forwards it to those actions).
   - Personal bests remain tracked per-difficulty only (not per-category) for now — noted under "Later tweaks" below if that's ever worth splitting out.
 - `flutter analyze` is clean, `flutter test` passes, and the app boots on macOS desktop with no crashes (only local device available, as noted in Session 1).
+
+### Session 8
+- Implemented the Localization roadmap item, scoped down after confirming with the user: **UI strings only** (English + German), a **manual language picker in Settings** (defaults to device locale), using **Flutter's built-in `flutter gen-l10n` tooling** (no third-party i18n package). Phrase *content* stays English-only until the Tatoeba sentence-library task.
+  - Added `flutter_localizations` (Flutter SDK) + `intl: ^0.20.2` to `pubspec.yaml`, enabled `generate: true`, and added `l10n.yaml` (arb-dir `lib/l10n`, output to `lib/l10n/generated`, non-synthetic — `synthetic-package` is deprecated/removed as of this Flutter version). Added `/lib/l10n/generated/` to `.gitignore` since `flutter gen-l10n` regenerates it on every `pub get`/run/build.
+  - New `lib/l10n/app_en.arb` (template) + `lib/l10n/app_de.arb`: every user-facing string in the app (Home, Settings, onboarding dialog, live HUD labels, Results, Practice's exit-confirm dialog, the paused overlay, difficulty/category labels+descriptions, snackbar/badge copy), including three ICU placeholders (`comingSoonSnackbar`, `difficultyBestWpm`, `resultSummaryLine`).
+  - `Difficulty` and `PhraseCategory` (`lib/models/`): `label`/`subtitle`/`description` changed from plain getters to methods taking `AppLocalizations l10n`, since they now need to reflect the chosen language. Updated every call site (`DifficultyCard`, `PhraseCategorySelector`, `HomeScreen`, `PracticeScreen`, `ResultScreen`).
+  - `lib/progress/settings_store.dart`: `AppSettings` gained a `locale` field (`Locale?`, null = follow device locale) + `SettingsStore.setLocale`; persisted as `'system'/'en'/'de'`.
+  - `lib/main.dart`: `MaterialApp` now wires `localizationsDelegates`/`supportedLocales`/`locale` (from `SettingsStore`) and uses `onGenerateTitle` for the window/task-switcher title.
+  - `lib/screens/settings_screen.dart`: new "Language" section with a `SegmentedButton<Locale?>` (System/English/German), same visual style as the existing theme-mode selector.
+  - Swapped every remaining hardcoded `Text('...')`/dialog/snackbar/tooltip string across `HomeScreen`, `DifficultyCard`, `PhraseCategorySelector`, `OnboardingTipsDialog`, `LiveStatsRow`, `ResultScreen`, `PracticeScreen` (exit-confirm dialog + top bar title), and `PracticePausedOverlay` for `AppLocalizations.of(context)` lookups.
+- `flutter analyze` is clean, `flutter test` passes, and the app boots on macOS desktop with no crashes.

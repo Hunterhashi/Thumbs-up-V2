@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:thumbs_up/l10n/generated/app_localizations.dart';
 import 'package:thumbs_up/models/difficulty.dart';
 import 'package:thumbs_up/models/phrase_category.dart';
 import 'package:thumbs_up/navigation/app_router.dart';
@@ -51,9 +52,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _onSelectDifficulty(BuildContext context, Difficulty difficulty) {
     if (!difficulty.isAvailable) {
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${difficulty.label} (Speed Stream) is coming soon.'),
+          content: Text(l10n.comingSoonSnackbar(difficulty.label(l10n))),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -64,6 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -77,20 +80,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Expanded(
                     child: Text(
-                      'Choose Your\nChallenge',
+                      l10n.homeHeadline,
                       style: Theme.of(context).textTheme.headlineLarge,
                     ),
                   ),
                   IconButton(
                     onPressed: () => AppRouter.toSettings(context),
                     icon: const Icon(Icons.settings_rounded),
-                    tooltip: 'Settings',
+                    tooltip: l10n.settingsTooltip,
                   ),
                 ],
               ),
               const SizedBox(height: 8),
               Text(
-                'Pick a difficulty and start typing',
+                l10n.homeSubtitle,
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 20),
