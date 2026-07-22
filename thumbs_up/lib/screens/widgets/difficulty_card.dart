@@ -8,10 +8,14 @@ class DifficultyCard extends StatelessWidget {
     super.key,
     required this.difficulty,
     required this.onTap,
+    this.bestWpm,
   });
 
   final Difficulty difficulty;
   final VoidCallback onTap;
+
+  /// The saved personal best WPM for this difficulty, if any.
+  final double? bestWpm;
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +71,10 @@ class DifficultyCard extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Text(difficulty.label, style: theme.textTheme.titleLarge),
+                        Text(
+                          difficulty.label,
+                          style: theme.textTheme.titleLarge,
+                        ),
                         const SizedBox(width: 8),
                         if (!isAvailable)
                           Container(
@@ -76,7 +83,9 @@ class DifficultyCard extends StatelessWidget {
                               vertical: 2,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.appleGray.withValues(alpha: 0.15),
+                              color: AppColors.appleGray.withValues(
+                                alpha: 0.15,
+                              ),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
@@ -89,13 +98,35 @@ class DifficultyCard extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 4),
-                    Text(difficulty.description, style: theme.textTheme.bodyMedium),
+                    Text(
+                      difficulty.description,
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                    if (bestWpm != null) ...[
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.brandYellow.withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          'Best: ${bestWpm!.round()} WPM',
+                          style: theme.textTheme.labelLarge,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
               Icon(
                 Icons.chevron_right_rounded,
-                color: AppColors.appleGray.withValues(alpha: isAvailable ? 0.8 : 0.4),
+                color: AppColors.appleGray.withValues(
+                  alpha: isAvailable ? 0.8 : 0.4,
+                ),
                 size: 26,
               ),
             ],

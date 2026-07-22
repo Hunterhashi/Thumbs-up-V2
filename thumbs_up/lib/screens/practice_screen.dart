@@ -5,6 +5,7 @@ import 'package:thumbs_up/data/easy_phrases_en.dart';
 import 'package:thumbs_up/lesson/phrase_deck.dart';
 import 'package:thumbs_up/models/difficulty.dart';
 import 'package:thumbs_up/navigation/app_router.dart';
+import 'package:thumbs_up/progress/personal_best_store.dart';
 import 'package:thumbs_up/screens/widgets/live_stats_row.dart';
 import 'package:thumbs_up/screens/widgets/phrase_stream_view.dart';
 import 'package:thumbs_up/screens/widgets/practice_paused_overlay.dart';
@@ -77,9 +78,12 @@ class _PracticeScreenState extends State<PracticeScreen> {
     _engine.onTextChanged(_controller.text);
     if (_engine.completed && !_navigatedToResult) {
       _navigatedToResult = true;
-      Future<void>.delayed(const Duration(milliseconds: 250), () {
+      Future<void>.delayed(const Duration(milliseconds: 250), () async {
         if (!mounted) return;
-        AppRouter.toResult(context, _engine.buildResult(widget.difficulty));
+        final result = _engine.buildResult(widget.difficulty);
+        final isNewBest = await PersonalBestStore.saveIfBest(result);
+        if (!mounted) return;
+        AppRouter.toResult(context, result, isNewBest: isNewBest);
       });
     }
     setState(() {});

@@ -2,13 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:thumbs_up/models/session_result.dart';
 import 'package:thumbs_up/navigation/app_router.dart';
 import 'package:thumbs_up/screens/widgets/result_stat_card.dart';
+import 'package:thumbs_up/theme/app_theme.dart';
 
 /// Shown after a Practice run finishes: WPM, accuracy, time and mistakes,
 /// with actions to try again or return Home.
 class ResultScreen extends StatelessWidget {
-  const ResultScreen({super.key, required this.result});
+  const ResultScreen({super.key, required this.result, this.isNewBest = false});
 
   final SessionResult result;
+
+  /// Whether this run just set a new personal best WPM for its difficulty.
+  final bool isNewBest;
 
   String _formatElapsed(Duration d) {
     final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
@@ -35,6 +39,10 @@ class ResultScreen extends StatelessWidget {
                 '${result.difficulty.label} · ${_formatElapsed(result.elapsed)}',
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
+              if (isNewBest) ...[
+                const SizedBox(height: 12),
+                const _NewPersonalBestBadge(),
+              ],
               const SizedBox(height: 28),
               Row(
                 children: [
@@ -104,6 +112,37 @@ class ResultScreen extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _NewPersonalBestBadge extends StatelessWidget {
+  const _NewPersonalBestBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.brandYellow.withValues(alpha: 0.18),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.brandYellow.withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            Icons.emoji_events_rounded,
+            size: 16,
+            color: AppColors.matteBlack,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            'New personal best',
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
+        ],
       ),
     );
   }

@@ -26,10 +26,9 @@ class AppRouter {
   /// Replaces the whole stack with [HomeScreen] (used after Launch, and
   /// whenever the user taps "Home" to fully exit a run).
   static void toHome(BuildContext context) {
-    Navigator.of(context).pushAndRemoveUntil(
-      fadeThrough(const HomeScreen()),
-      (route) => false,
-    );
+    Navigator.of(
+      context,
+    ).pushAndRemoveUntil(fadeThrough(const HomeScreen()), (route) => false);
   }
 
   /// Pushes a new Practice run for [difficulty].
@@ -61,20 +60,22 @@ class AppRouter {
   ) {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
-        builder: (_) => PracticeScreen(
-          difficulty: difficulty,
-          initialPhrase: phrase,
-        ),
+        builder: (_) =>
+            PracticeScreen(difficulty: difficulty, initialPhrase: phrase),
       ),
     );
   }
 
   /// Replaces the current Practice screen with the Results screen so the
   /// back button from Results returns to Home, not to a finished run.
-  static void toResult(BuildContext context, SessionResult result) {
+  static void toResult(
+    BuildContext context,
+    SessionResult result, {
+    bool isNewBest = false,
+  }) {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
-        builder: (_) => ResultScreen(result: result),
+        builder: (_) => ResultScreen(result: result, isNewBest: isNewBest),
       ),
     );
   }

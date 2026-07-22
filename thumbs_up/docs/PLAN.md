@@ -19,7 +19,7 @@
 - [x] `ResultScreen` (WPM/accuracy/mistakes/backspaces)
 - [x] Practice controls: top bar Back/Restart, exit-confirm dialog, and Pause/Resume (with correct timer handling)
 - [x] Results actions: Next phrase / Repeat / Change difficulty
-- [ ] Local persistence (personal best per difficulty, settings, one-time onboarding tips)
+- [x] Local persistence: personal best per difficulty + one-time onboarding tips (Settings — haptics/HUD/theme toggles — still pending)
 - [ ] Phrase packs / categories (e.g. punctuation & numbers mode)
 - [ ] Localization (English + German UI strings + language selector)
 - [ ] Sentence library (Tatoeba-based, large EN/DE pool, filtered + attributed)
@@ -283,3 +283,14 @@ These are captured as always-on Cursor rules now (see `.cursor/rules/flutter-dar
   - `PracticeTopBar` gained a pause/resume icon button (disabled until the run has started, hidden state once completed).
   - `PracticeScreen` wires this up: pausing unfocuses/disables the hidden input and shows a new `PracticePausedOverlay` (blocks the Phrase Stream from view + a "Resume" button); the 200ms tick timer skips rebuilding while paused.
 - `flutter analyze` is clean, `flutter test` passes, and both files were formatted with `dart format`.
+- Committed as `a2ad033` ("Add Pause/Resume to Practice runs").
+
+### Session 5
+- Implemented roadmap items D (local personal best per difficulty) + J (one-time onboarding tips), the next item after Pause/Resume. Added the `shared_preferences` dependency (`2.5.5`) to back both.
+  - New `lib/progress/personal_best_store.dart`: `PersonalBest` + `PersonalBestStore.load/saveIfBest`, keyed per difficulty, comparing by WPM.
+  - New `lib/progress/onboarding_store.dart` + `lib/screens/widgets/onboarding_tips_dialog.dart`: one-time "Got it" tips dialog, shown once on the first Home visit.
+  - `PracticeScreen` now calls `PersonalBestStore.saveIfBest` on completion and forwards `isNewBest` through `AppRouter.toResult` to `ResultScreen`, which shows a small "New personal best" badge when true.
+  - `HomeScreen` is now a `StatefulWidget`: loads each difficulty's best WPM (shown on `DifficultyCard` as a small "Best: N WPM" pill) and shows the onboarding dialog once.
+  - `test/widget_test.dart` now calls `SharedPreferences.setMockInitialValues({})` before pumping, since Home reads prefs on init.
+- Settings (E: haptics/HUD/theme toggles) intentionally stayed out of scope for this pass.
+- `flutter analyze` is clean and `flutter test` passes.
