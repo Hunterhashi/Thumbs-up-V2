@@ -76,16 +76,28 @@ class ResultScreen extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () =>
-                      AppRouter.replacePractice(context, result.difficulty),
-                  child: const Text('Try Again'),
+                      AppRouter.nextPhrase(context, result.difficulty),
+                  child: const Text('Next phrase'),
                 ),
               ),
               const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
                 child: TextButton(
+                  onPressed: () => AppRouter.repeatPhrase(
+                    context,
+                    result.difficulty,
+                    result.phrase,
+                  ),
+                  child: const Text('Repeat'),
+                ),
+              ),
+              const SizedBox(height: 4),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
                   onPressed: () => AppRouter.toHome(context),
-                  child: const Text('Home'),
+                  child: const Text('Change difficulty'),
                 ),
               ),
               const SizedBox(height: 24),

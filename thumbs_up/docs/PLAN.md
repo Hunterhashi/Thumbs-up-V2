@@ -18,7 +18,7 @@
 - [x] `PracticeScreen` (static Phrase Stream, hidden input, live HUD)
 - [x] `ResultScreen` (WPM/accuracy/mistakes/backspaces)
 - [ ] Practice controls — **partially done**: top bar Back/Restart + exit-confirm dialog are in; Pause/Resume (with correct timer handling) is still pending
-- [ ] Results actions — **partially done**: currently just "Try Again" + "Home"; not yet split into separate Next phrase / Repeat / Change difficulty actions
+- [x] Results actions: Next phrase / Repeat / Change difficulty
 - [ ] Local persistence (personal best per difficulty, settings, one-time onboarding tips)
 - [ ] Phrase packs / categories (e.g. punctuation & numbers mode)
 - [ ] Localization (English + German UI strings + language selector)
@@ -270,3 +270,8 @@ These are captured as always-on Cursor rules now (see `.cursor/rules/flutter-dar
 ### Session 2
 - Fixed a pending-timer failure in `test/widget_test.dart`: the test now pumps 3 seconds after boot to flush the `LaunchScreen`'s spinner fade-in (1.5s) and delayed navigation to Home (2.8s) timers before the test completes. `flutter test` passes cleanly.
 - Added this in-repo plan doc (`docs/PLAN.md`) plus an always-on Cursor rule (`.cursor/rules/thumbs-up-plan.mdc`) so the plan and progress log are automatically available at the start of every new session, instead of only living in Cursor's global, machine-local plans folder.
+
+### Session 3
+- Implemented the "Results actions" roadmap item (C): `ResultScreen` now shows **Next phrase** (new phrase, same difficulty), **Repeat** (same phrase again), and **Change difficulty** (returns to Home), replacing the old "Try Again"/"Home" pair.
+- To support "Repeat", `PracticeScreen` gained an optional `initialPhrase` param (skips drawing a new phrase from the deck when set), and `AppRouter.replacePractice` was split into `AppRouter.nextPhrase` and `AppRouter.repeatPhrase`.
+- `flutter analyze` is clean and `flutter test` passes after the change.

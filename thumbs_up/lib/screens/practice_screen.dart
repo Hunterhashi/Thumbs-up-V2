@@ -16,9 +16,17 @@ import 'package:thumbs_up/typing/typing_engine.dart';
 /// Only [Difficulty.easy] is playable today; the scrolling "Speed Stream"
 /// for Medium/Pro is implemented in a later milestone.
 class PracticeScreen extends StatefulWidget {
-  const PracticeScreen({super.key, required this.difficulty});
+  const PracticeScreen({
+    super.key,
+    required this.difficulty,
+    this.initialPhrase,
+  });
 
   final Difficulty difficulty;
+
+  /// When set, the run starts with this exact phrase instead of drawing a
+  /// new one from the deck (used by Results' "Repeat" action).
+  final String? initialPhrase;
 
   @override
   State<PracticeScreen> createState() => _PracticeScreenState();
@@ -36,7 +44,9 @@ class _PracticeScreenState extends State<PracticeScreen> {
   void initState() {
     super.initState();
     _deck = PhraseDeck(easyPhrasesEn);
-    _engine = TypingEngine(targetPhrase: _deck.next());
+    _engine = TypingEngine(
+      targetPhrase: widget.initialPhrase ?? _deck.next(),
+    );
     _controller.addListener(_onControllerChanged);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {

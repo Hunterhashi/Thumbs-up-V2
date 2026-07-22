@@ -41,12 +41,30 @@ class AppRouter {
     );
   }
 
-  /// Starts a fresh Practice run in place of the current one (used by
-  /// "Try again" / "Restart" so the stack doesn't keep growing).
-  static void replacePractice(BuildContext context, Difficulty difficulty) {
+  /// Starts a fresh Practice run with a new phrase, in place of the current
+  /// one (used by Results' "Next phrase" action so the stack doesn't keep
+  /// growing).
+  static void nextPhrase(BuildContext context, Difficulty difficulty) {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
         builder: (_) => PracticeScreen(difficulty: difficulty),
+      ),
+    );
+  }
+
+  /// Starts a fresh Practice run with the same [phrase] just completed
+  /// (used by Results' "Repeat" action).
+  static void repeatPhrase(
+    BuildContext context,
+    Difficulty difficulty,
+    String phrase,
+  ) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(
+        builder: (_) => PracticeScreen(
+          difficulty: difficulty,
+          initialPhrase: phrase,
+        ),
       ),
     );
   }
