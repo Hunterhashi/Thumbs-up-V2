@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:thumbs_up/models/difficulty.dart';
+import 'package:thumbs_up/models/phrase_category.dart';
 import 'package:thumbs_up/models/session_result.dart';
 import 'package:thumbs_up/screens/home_screen.dart';
 import 'package:thumbs_up/screens/practice_screen.dart';
 import 'package:thumbs_up/screens/result_screen.dart';
+import 'package:thumbs_up/screens/settings_screen.dart';
 
 /// Centralizes navigation for Launch → Home → Practice → Results so
 /// individual screens don't need to know route/transition details.
@@ -31,22 +33,40 @@ class AppRouter {
     ).pushAndRemoveUntil(fadeThrough(const HomeScreen()), (route) => false);
   }
 
-  /// Pushes a new Practice run for [difficulty].
-  static void toPractice(BuildContext context, Difficulty difficulty) {
+  /// Pushes the Settings screen (haptics/HUD/theme toggles).
+  static void toSettings(BuildContext context) {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute<void>(builder: (_) => const SettingsScreen()));
+  }
+
+  /// Pushes a new Practice run for [difficulty] using [category]'s phrase
+  /// pack.
+  static void toPractice(
+    BuildContext context,
+    Difficulty difficulty,
+    PhraseCategory category,
+  ) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => PracticeScreen(difficulty: difficulty),
+        builder: (_) =>
+            PracticeScreen(difficulty: difficulty, category: category),
       ),
     );
   }
 
-  /// Starts a fresh Practice run with a new phrase, in place of the current
-  /// one (used by Results' "Next phrase" action so the stack doesn't keep
-  /// growing).
-  static void nextPhrase(BuildContext context, Difficulty difficulty) {
+  /// Starts a fresh Practice run with a new phrase from [category]'s pack,
+  /// in place of the current one (used by Results' "Next phrase" action so
+  /// the stack doesn't keep growing).
+  static void nextPhrase(
+    BuildContext context,
+    Difficulty difficulty,
+    PhraseCategory category,
+  ) {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
-        builder: (_) => PracticeScreen(difficulty: difficulty),
+        builder: (_) =>
+            PracticeScreen(difficulty: difficulty, category: category),
       ),
     );
   }
@@ -56,12 +76,16 @@ class AppRouter {
   static void repeatPhrase(
     BuildContext context,
     Difficulty difficulty,
+    PhraseCategory category,
     String phrase,
   ) {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
-        builder: (_) =>
-            PracticeScreen(difficulty: difficulty, initialPhrase: phrase),
+        builder: (_) => PracticeScreen(
+          difficulty: difficulty,
+          category: category,
+          initialPhrase: phrase,
+        ),
       ),
     );
   }

@@ -36,7 +36,8 @@ class ResultScreen extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                '${result.difficulty.label} · ${_formatElapsed(result.elapsed)}',
+                '${result.difficulty.label} · ${result.category.label} · '
+                '${_formatElapsed(result.elapsed)}',
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               if (isNewBest) ...[
@@ -83,8 +84,11 @@ class ResultScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () =>
-                      AppRouter.nextPhrase(context, result.difficulty),
+                  onPressed: () => AppRouter.nextPhrase(
+                    context,
+                    result.difficulty,
+                    result.category,
+                  ),
                   child: const Text('Next phrase'),
                 ),
               ),
@@ -95,6 +99,7 @@ class ResultScreen extends StatelessWidget {
                   onPressed: () => AppRouter.repeatPhrase(
                     context,
                     result.difficulty,
+                    result.category,
                     result.phrase,
                   ),
                   child: const Text('Repeat'),

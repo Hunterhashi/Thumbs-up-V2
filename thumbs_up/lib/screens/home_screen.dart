@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:thumbs_up/models/difficulty.dart';
+import 'package:thumbs_up/models/phrase_category.dart';
 import 'package:thumbs_up/navigation/app_router.dart';
 import 'package:thumbs_up/progress/onboarding_store.dart';
 import 'package:thumbs_up/progress/personal_best_store.dart';
 import 'package:thumbs_up/screens/widgets/difficulty_card.dart';
 import 'package:thumbs_up/screens/widgets/onboarding_tips_dialog.dart';
+import 'package:thumbs_up/screens/widgets/phrase_category_selector.dart';
 
 /// Lets the user pick a difficulty, then starts a Practice run.
 ///
@@ -19,6 +21,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final Map<Difficulty, double> _bestWpm = {};
+  PhraseCategory _selectedCategory = PhraseCategory.everyday;
 
   @override
   void initState() {
@@ -56,7 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
       return;
     }
-    AppRouter.toPractice(context, difficulty);
+    AppRouter.toPractice(context, difficulty, _selectedCategory);
   }
 
   @override
@@ -69,16 +72,34 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 24),
-              Text(
-                'Choose Your\nChallenge',
-                style: Theme.of(context).textTheme.headlineLarge,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Choose Your\nChallenge',
+                      style: Theme.of(context).textTheme.headlineLarge,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => AppRouter.toSettings(context),
+                    icon: const Icon(Icons.settings_rounded),
+                    tooltip: 'Settings',
+                  ),
+                ],
               ),
               const SizedBox(height: 8),
               Text(
                 'Pick a difficulty and start typing',
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 20),
+              PhraseCategorySelector(
+                selected: _selectedCategory,
+                onChanged: (category) =>
+                    setState(() => _selectedCategory = category),
+              ),
+              const SizedBox(height: 24),
               Expanded(
                 child: ListView.separated(
                   physics: const BouncingScrollPhysics(),

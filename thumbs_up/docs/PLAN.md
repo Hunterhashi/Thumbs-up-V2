@@ -19,8 +19,9 @@
 - [x] `ResultScreen` (WPM/accuracy/mistakes/backspaces)
 - [x] Practice controls: top bar Back/Restart, exit-confirm dialog, and Pause/Resume (with correct timer handling)
 - [x] Results actions: Next phrase / Repeat / Change difficulty
-- [x] Local persistence: personal best per difficulty + one-time onboarding tips (Settings — haptics/HUD/theme toggles — still pending)
-- [ ] Phrase packs / categories (e.g. punctuation & numbers mode)
+- [x] Local persistence: personal best per difficulty + one-time onboarding tips
+- [x] Settings (E): haptics on/off, live HUD on/off, theme mode (system/light/dark)
+- [x] Phrase packs / categories (Easy: Everyday + Punctuation & Numbers, picked on Home)
 - [ ] Localization (English + German UI strings + language selector)
 - [ ] Sentence library (Tatoeba-based, large EN/DE pool, filtered + attributed)
 - [ ] Medium/Pro "Speed Stream" (treadmill) mode + scoring, speed tuned on-device
@@ -237,6 +238,7 @@ These are captured as always-on Cursor rules now (see `.cursor/rules/flutter-dar
 - **Package/bundle id**: set a final reverse-DNS id before store release.
 - **Speed Stream tuning**: tune scroll speeds after on-device testing; optionally add a 60s toggle.
 - **Sentence library**: expand and refine filters/packs so sentences feel human; persist the "deck index" so repeats stay rare.
+- **Phrase packs**: consider persisting the last-picked category (like theme mode) and tracking personal bests per `(difficulty, category)` instead of difficulty alone.
 - **Scoring + start UX**: revisit mistake/backspace rules after playtesting; decide if a short countdown or tap-to-start is wanted.
 - **Accessibility**: add reduce-motion fallback for Speed Stream; color-blind safe cues; Dynamic Type sizing.
 - **Native polish**: generate launcher icons + native splash from brand assets.
@@ -294,3 +296,24 @@ These are captured as always-on Cursor rules now (see `.cursor/rules/flutter-dar
   - `test/widget_test.dart` now calls `SharedPreferences.setMockInitialValues({})` before pumping, since Home reads prefs on init.
 - Settings (E: haptics/HUD/theme toggles) intentionally stayed out of scope for this pass.
 - `flutter analyze` is clean and `flutter test` passes.
+
+### Session 6
+- Implemented roadmap item E (Settings: haptics on/off, live HUD on/off, theme mode), the next item after personal bests/onboarding.
+  - New `lib/progress/settings_store.dart`: `AppSettings` (immutable snapshot) + `SettingsStore`, a static store backed by `shared_preferences` that also exposes a `ValueNotifier<AppSettings>` (`SettingsStore.notifier`/`.current`) so widgets can either read the latest value synchronously or react live, without pulling in a state-management package.
+  - `HapticEngine.correctKey`/`wrongKey` now check `SettingsStore.current.hapticsEnabled` before triggering feedback — this was already anticipated by that class's original doc comment.
+  - `PracticeScreen` now hides the `LiveStatsRow` HUD entirely when `SettingsStore.current.hudEnabled` is false.
+  - `main.dart`: `main()` is now `async`, calling `SettingsStore.load()` (persisted prefs) before `runApp`; `ThumbsUpApp` wraps `MaterialApp` in a `ValueListenableBuilder` on `SettingsStore.notifier` so changing the theme mode in Settings updates the whole app immediately.
+  - New `lib/screens/settings_screen.dart`: a "Practice" section with two `SwitchListTile`s (haptics, HUD) and an "Appearance" section with a `SegmentedButton<ThemeMode>` (System/Light/Dark), all reading/writing through `SettingsStore`.
+  - `HomeScreen` gained a settings gear `IconButton` next to the "Choose Your Challenge" header; `AppRouter.toSettings` pushes the new screen.
+- `flutter analyze` is clean and `flutter test` passes. (Ran `dart format` too, but reverted the incidental reformatting it made to unrelated pre-existing files — a newer local `dart format` version changed their wrapping — to keep this session's diff scoped to the Settings feature.)
+
+### Session 7
+- Implemented roadmap item I (Phrase packs / categories), scoped down after confirming with the user: only two packs for now (**Everyday** = the existing list, **Punctuation & Numbers** = new), picked via chips on the Home screen, Easy-difficulty only (the data model is generic so Medium/Pro can reuse it once Speed Stream ships).
+  - New `lib/models/phrase_category.dart`: `PhraseCategory` enum (`everyday`, `punctuationNumbers`) with `label`/`description`, mirroring `Difficulty`'s style.
+  - New `lib/data/easy_phrases_punctuation_numbers_en.dart`: 20 starter Easy phrases that deliberately include digits/punctuation ($, %, times, dates, etc.), matching the tone/length of the existing list (and its "avoid apostrophes" convention, since Dart source uses single-quoted string literals).
+  - New `lib/data/phrase_packs.dart`: `easyPhrasePacks`, a `Map<PhraseCategory, List<String>>` — the single place that maps a category to its phrase pool.
+  - New `lib/screens/widgets/phrase_category_selector.dart`: a `ChoiceChip` row for picking the category, styled with the existing brand tokens.
+  - `HomeScreen` now holds `_selectedCategory` state, renders `PhraseCategorySelector` above the difficulty list, and passes it into `AppRouter.toPractice`.
+  - Threaded `PhraseCategory` through the run: `PracticeScreen` (new required `category` param, used to pick the deck's phrase pool), `TypingEngine.buildResult`, `SessionResult` (new `category` field), `AppRouter.nextPhrase`/`repeatPhrase` (new `category` param so "Next phrase"/"Repeat" keep using the same pack), and `ResultScreen` (now shows the category in its header line and forwards it to those actions).
+  - Personal bests remain tracked per-difficulty only (not per-category) for now — noted under "Later tweaks" below if that's ever worth splitting out.
+- `flutter analyze` is clean, `flutter test` passes, and the app boots on macOS desktop with no crashes (only local device available, as noted in Session 1).

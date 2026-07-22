@@ -1,9 +1,11 @@
 import 'package:thumbs_up/models/difficulty.dart';
+import 'package:thumbs_up/models/phrase_category.dart';
 
 /// Final stats produced by a Practice run, shown on the Results screen.
 class SessionResult {
   const SessionResult({
     required this.difficulty,
+    required this.category,
     required this.phrase,
     required this.elapsed,
     required this.correctChars,
@@ -12,6 +14,7 @@ class SessionResult {
   });
 
   final Difficulty difficulty;
+  final PhraseCategory category;
   final String phrase;
   final Duration elapsed;
 

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:thumbs_up/progress/settings_store.dart';
 import 'package:thumbs_up/screens/launch_screen.dart';
 import 'package:thumbs_up/theme/app_theme.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SettingsStore.load();
   runApp(const ThumbsUpApp());
 }
 
@@ -11,13 +14,18 @@ class ThumbsUpApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Thumbs Up',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
-      home: const LaunchScreen(),
+    return ValueListenableBuilder<AppSettings>(
+      valueListenable: SettingsStore.notifier,
+      builder: (context, settings, _) {
+        return MaterialApp(
+          title: 'Thumbs Up',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: settings.themeMode,
+          home: const LaunchScreen(),
+        );
+      },
     );
   }
 }

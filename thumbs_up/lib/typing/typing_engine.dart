@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:thumbs_up/models/difficulty.dart';
+import 'package:thumbs_up/models/phrase_category.dart';
 import 'package:thumbs_up/models/session_result.dart';
 import 'package:thumbs_up/typing/char_status.dart';
 import 'package:thumbs_up/typing/haptic_engine.dart';
@@ -143,9 +144,10 @@ class TypingEngine extends ChangeNotifier {
     });
   }
 
-  SessionResult buildResult(Difficulty difficulty) {
+  SessionResult buildResult(Difficulty difficulty, PhraseCategory category) {
     return SessionResult(
       difficulty: difficulty,
+      category: category,
       phrase: targetPhrase,
       elapsed: elapsed,
       correctChars: correctCharsTyped,

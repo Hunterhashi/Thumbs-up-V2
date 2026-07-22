@@ -1,11 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:thumbs_up/data/easy_phrases_en.dart';
+import 'package:thumbs_up/data/phrase_packs.dart';
 import 'package:thumbs_up/lesson/phrase_deck.dart';
 import 'package:thumbs_up/models/difficulty.dart';
+import 'package:thumbs_up/models/phrase_category.dart';
 import 'package:thumbs_up/navigation/app_router.dart';
 import 'package:thumbs_up/progress/personal_best_store.dart';
+import 'package:thumbs_up/progress/settings_store.dart';
 import 'package:thumbs_up/screens/widgets/live_stats_row.dart';
 import 'package:thumbs_up/screens/widgets/phrase_stream_view.dart';
 import 'package:thumbs_up/screens/widgets/practice_paused_overlay.dart';
@@ -21,10 +23,14 @@ class PracticeScreen extends StatefulWidget {
   const PracticeScreen({
     super.key,
     required this.difficulty,
+    required this.category,
     this.initialPhrase,
   });
 
   final Difficulty difficulty;
+
+  /// Which phrase pack to draw from (see `lib/data/phrase_packs.dart`).
+  final PhraseCategory category;
 
   /// When set, the run starts with this exact phrase instead of drawing a
   /// new one from the deck (used by Results' "Repeat" action).
@@ -45,7 +51,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
   @override
   void initState() {
     super.initState();
-    _deck = PhraseDeck(easyPhrasesEn);
+    _deck = PhraseDeck(easyPhrasePacks[widget.category]!);
     _engine = TypingEngine(targetPhrase: widget.initialPhrase ?? _deck.next());
     _controller.addListener(_onControllerChanged);
 
@@ -80,7 +86,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
       _navigatedToResult = true;
       Future<void>.delayed(const Duration(milliseconds: 250), () async {
         if (!mounted) return;
-        final result = _engine.buildResult(widget.difficulty);
+        final result = _engine.buildResult(widget.difficulty, widget.category);
         final isNewBest = await PersonalBestStore.saveIfBest(result);
         if (!mounted) return;
         AppRouter.toResult(context, result, isNewBest: isNewBest);
@@ -176,12 +182,14 @@ class _PracticeScreenState extends State<PracticeScreen> {
                         isPaused: isPaused,
                         onPauseResume: canTogglePause ? _togglePause : null,
                       ),
-                      const SizedBox(height: 12),
-                      LiveStatsRow(
-                        elapsed: _engine.elapsed,
-                        wpm: _engine.liveWpm,
-                        accuracyPercent: _engine.liveAccuracy,
-                      ),
+                      if (SettingsStore.current.hudEnabled) ...[
+                        const SizedBox(height: 12),
+                        LiveStatsRow(
+                          elapsed: _engine.elapsed,
+                          wpm: _engine.liveWpm,
+                          accuracyPercent: _engine.liveAccuracy,
+                        ),
+                      ],
                       Expanded(
                         child: Center(
                           child: PhraseStreamView(
