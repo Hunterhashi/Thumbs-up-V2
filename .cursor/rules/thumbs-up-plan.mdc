@@ -1,0 +1,19 @@
+---
+description: Points to the in-repo Thumbs Up MVP plan/progress tracker
+alwaysApply: true
+---
+
+# Thumbs Up Project Plan
+
+[thumbs_up/docs/PLAN.md](../../thumbs_up/docs/PLAN.md) is the single source of
+truth for this app's scope, remaining work, and progress log.
+
+- At the start of work on the Thumbs Up app, check that file's
+  **Status / todo checklist** and **Progress log** sections to see what's
+  already done and what's still pending before planning new work.
+- After completing meaningful work on the app, append a new dated entry to
+  the **Progress log** section (don't rewrite prior entries) and update the
+  checkbox states in **Status / todo checklist** so the doc stays accurate
+  for the next session.
+- Treat the rest of the doc (specs, tokens, roadmap) as stable reference
+  material — only edit it if the plan itself actually changes.
