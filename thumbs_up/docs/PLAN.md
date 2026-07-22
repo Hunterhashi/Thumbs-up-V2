@@ -17,7 +17,7 @@
 - [x] `LaunchScreen` + `HomeScreen` (difficulty selection)
 - [x] `PracticeScreen` (static Phrase Stream, hidden input, live HUD)
 - [x] `ResultScreen` (WPM/accuracy/mistakes/backspaces)
-- [ ] Practice controls — **partially done**: top bar Back/Restart + exit-confirm dialog are in; Pause/Resume (with correct timer handling) is still pending
+- [x] Practice controls: top bar Back/Restart, exit-confirm dialog, and Pause/Resume (with correct timer handling)
 - [x] Results actions: Next phrase / Repeat / Change difficulty
 - [ ] Local persistence (personal best per difficulty, settings, one-time onboarding tips)
 - [ ] Phrase packs / categories (e.g. punctuation & numbers mode)
@@ -275,3 +275,11 @@ These are captured as always-on Cursor rules now (see `.cursor/rules/flutter-dar
 - Implemented the "Results actions" roadmap item (C): `ResultScreen` now shows **Next phrase** (new phrase, same difficulty), **Repeat** (same phrase again), and **Change difficulty** (returns to Home), replacing the old "Try Again"/"Home" pair.
 - To support "Repeat", `PracticeScreen` gained an optional `initialPhrase` param (skips drawing a new phrase from the deck when set), and `AppRouter.replacePractice` was split into `AppRouter.nextPhrase` and `AppRouter.repeatPhrase`.
 - `flutter analyze` is clean and `flutter test` passes after the change.
+- Committed as `ef25d1d` ("Split Results screen into Next phrase / Repeat / Change difficulty actions").
+
+### Session 4
+- Implemented roadmap item G (Pause/Resume), the item the plan says must land **before** local personal-best persistence, since it affects elapsed time/WPM:
+  - `TypingEngine` now tracks time with a `Stopwatch` instead of raw `DateTime`s, and gained `isPaused`, `pause()`, and `resume()`. `elapsed` freezes while paused and `onTextChanged` is a no-op during a pause, so keystrokes typed while paused can't leak into the run.
+  - `PracticeTopBar` gained a pause/resume icon button (disabled until the run has started, hidden state once completed).
+  - `PracticeScreen` wires this up: pausing unfocuses/disables the hidden input and shows a new `PracticePausedOverlay` (blocks the Phrase Stream from view + a "Resume" button); the 200ms tick timer skips rebuilding while paused.
+- `flutter analyze` is clean, `flutter test` passes, and both files were formatted with `dart format`.

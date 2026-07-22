@@ -13,6 +13,8 @@ import 'package:thumbs_up/typing/wpm_calculator.dart';
 /// - Counts mistakes (wrong key typed, even if later corrected) and
 ///   backspaces (tracked separately, do not reduce the mistake count).
 /// - Exposes live WPM/accuracy and completion state.
+/// - Supports pausing: [elapsed] stops advancing while [isPaused], and
+///   input is expected to be ignored by the caller during a pause.
 class TypingEngine extends ChangeNotifier {
   TypingEngine({
     required this.targetPhrase,
@@ -22,25 +24,24 @@ class TypingEngine extends ChangeNotifier {
   final String targetPhrase;
   final HapticEngine haptics;
 
+  final Stopwatch _stopwatch = Stopwatch();
   String _typed = '';
   int _mistakes = 0;
   int _backspaces = 0;
-  DateTime? _startTime;
-  DateTime? _endTime;
+  bool _started = false;
+  bool _paused = false;
   bool _completed = false;
 
   String get typed => _typed;
-  bool get isStarted => _startTime != null;
+  bool get isStarted => _started;
+  bool get isPaused => _paused;
   bool get completed => _completed;
   int get mistakes => _mistakes;
   int get backspaces => _backspaces;
 
-  /// Time since the first keystroke. Keeps ticking until [completed].
-  Duration get elapsed {
-    if (_startTime == null) return Duration.zero;
-    final end = _endTime ?? DateTime.now();
-    return end.difference(_startTime!);
-  }
+  /// Time since the first keystroke, excluding any paused duration. Keeps
+  /// ticking until [completed] or [isPaused].
+  Duration get elapsed => _stopwatch.elapsed;
 
   int get correctCharsTyped {
     var count = 0;
@@ -54,19 +55,22 @@ class TypingEngine extends ChangeNotifier {
       WpmCalculator.wpm(correctChars: correctCharsTyped, elapsed: elapsed);
 
   double get liveAccuracy => WpmCalculator.accuracyPercent(
-        correctChars: correctCharsTyped,
-        mistakes: _mistakes,
-      );
+    correctChars: correctCharsTyped,
+    mistakes: _mistakes,
+  );
 
   /// Call whenever the hidden input field's text changes.
   void onTextChanged(String newText) {
-    if (_completed) return;
+    if (_completed || _paused) return;
 
     if (newText.length > targetPhrase.length) {
       newText = newText.substring(0, targetPhrase.length);
     }
 
-    _startTime ??= newText.isNotEmpty ? DateTime.now() : null;
+    if (!_started && newText.isNotEmpty) {
+      _started = true;
+      _stopwatch.start();
+    }
 
     if (newText.length > _typed.length) {
       final index = newText.length - 1;
@@ -87,9 +91,27 @@ class TypingEngine extends ChangeNotifier {
 
     if (_typed == targetPhrase) {
       _completed = true;
-      _endTime = DateTime.now();
+      _stopwatch.stop();
     }
 
+    notifyListeners();
+  }
+
+  /// Pauses the run: freezes [elapsed] and blocks further [onTextChanged]
+  /// calls until [resume] is called. No-op if not started, already
+  /// completed, or already paused.
+  void pause() {
+    if (!_started || _completed || _paused) return;
+    _paused = true;
+    _stopwatch.stop();
+    notifyListeners();
+  }
+
+  /// Resumes a paused run, continuing [elapsed] from where it left off.
+  void resume() {
+    if (!_paused) return;
+    _paused = false;
+    _stopwatch.start();
     notifyListeners();
   }
 
@@ -99,9 +121,12 @@ class TypingEngine extends ChangeNotifier {
     _typed = '';
     _mistakes = 0;
     _backspaces = 0;
-    _startTime = null;
-    _endTime = null;
+    _started = false;
+    _paused = false;
     _completed = false;
+    _stopwatch
+      ..stop()
+      ..reset();
     notifyListeners();
   }
 
