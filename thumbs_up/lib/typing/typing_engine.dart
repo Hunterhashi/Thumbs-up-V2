@@ -20,7 +20,7 @@ import 'package:thumbs_up/typing/wpm_calculator.dart';
 ///   input is expected to be ignored by the caller during a pause.
 class TypingEngine extends ChangeNotifier {
   TypingEngine({
-    required String this._targetPhrase,
+    required this._targetPhrase,
     this.haptics = const HapticEngine(),
     this.runDuration = const Duration(seconds: 30),
   });

@@ -167,7 +167,7 @@ abstract class AppLocalizations {
   /// No description provided for @difficultyEasyDescription.
   ///
   /// In en, this message translates to:
-  /// **'Short, static phrases · no time pressure'**
+  /// **'Short phrases · 30s loop'**
   String get difficultyEasyDescription;
 
   /// No description provided for @difficultyMediumDescription.

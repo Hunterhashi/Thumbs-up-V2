@@ -45,7 +45,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get difficultyProSubtitle => 'Speed Stream+';
 
   @override
-  String get difficultyEasyDescription => 'Kurze, feste Sätze · kein Zeitdruck';
+  String get difficultyEasyDescription => 'Kurze Sätze · 30-Sekunden-Loop';
 
   @override
   String get difficultyMediumDescription =>
