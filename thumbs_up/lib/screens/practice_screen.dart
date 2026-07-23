@@ -153,7 +153,12 @@ class _PracticeScreenState extends State<PracticeScreen>
       if (engine == null) return;
       engine.onTextChanged(_controller.text);
       if (engine.completed && !_navigatedToResult) {
-        _goToResult();
+        // Navigate after this frame so we never push during a text-input
+        // listener (IME / maxLength edge cases can otherwise skip the hop).
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          _goToResult();
+        });
       } else {
         setState(() {});
       }
@@ -163,15 +168,26 @@ class _PracticeScreenState extends State<PracticeScreen>
   Future<void> _goToResult() async {
     if (_navigatedToResult) return;
     _navigatedToResult = true;
-    await Future<void>.delayed(const Duration(milliseconds: 250));
-    if (!mounted) return;
+    try {
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+      if (!mounted) return;
 
-    final result = _isSpeedStream
-        ? _streamEngine!.buildResult(widget.difficulty, widget.category)
-        : _easyEngine!.buildResult(widget.difficulty, widget.category);
-    final isNewBest = await PersonalBestStore.saveIfBest(result);
-    if (!mounted) return;
-    AppRouter.toResult(context, result, isNewBest: isNewBest);
+      final result = _isSpeedStream
+          ? _streamEngine!.buildResult(widget.difficulty, widget.category)
+          : _easyEngine!.buildResult(widget.difficulty, widget.category);
+
+      // Prefer showing Results even if personal-best prefs fail.
+      var isNewBest = false;
+      try {
+        isNewBest = await PersonalBestStore.saveIfBest(result);
+      } catch (_) {}
+
+      if (!mounted) return;
+      AppRouter.toResult(context, result, isNewBest: isNewBest);
+    } catch (_) {
+      // Allow a retry if navigation itself failed after the guard flipped.
+      if (mounted) _navigatedToResult = false;
+    }
   }
 
   void _restart() {
@@ -345,12 +361,15 @@ class _PracticeScreenState extends State<PracticeScreen>
                             enableIMEPersonalizedLearning: false,
                             textCapitalization: TextCapitalization.none,
                             keyboardType: TextInputType.visiblePassword,
+                            // Easy: no maxLength — TypingEngine already truncates.
+                            // A tight maxLength + IME composition can drop the
+                            // final key and never mark the run completed.
                             maxLength: _isSpeedStream
                                 ? (_streamEngine != null &&
                                           _streamEngine!.activeWord.isNotEmpty
                                       ? _streamEngine!.activeWord.length
                                       : 32)
-                                : _easyEngine!.targetPhrase.length,
+                                : null,
                             decoration: const InputDecoration(
                               border: InputBorder.none,
                               isCollapsed: true,

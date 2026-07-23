@@ -30,7 +30,7 @@
 
 ## Post-MVP UI polish / bugfixes
 - [x] Schritt 1: Live-HUD gelbe Badges (Dark-Mode-Lesbarkeit für Zeit/WPM/Genauigkeit)
-- [ ] Schritt 2: Easy Fertigstellung → Results Navigation härten
+- [x] Schritt 2: Easy Fertigstellung → Results Navigation härten
 - [ ] Schritt 3: Easy 30s Phrase-Loop + Slide-Animation
 - [ ] Schritt 4: Pro Timer An/Aus + Speed-Einstellung — **Later tweaks** (kein Code in dieser Welle)
 
@@ -374,3 +374,11 @@ These are captured as always-on Cursor rules now (see `.cursor/rules/flutter-dar
 - Post-MVP polish Schritt 1: Live HUD (Zeit/WPM/Genauigkeit) in `live_stats_row.dart` uses yellow badges (`brandYellow` @ 0.9, radius 16, matteBlack text) matching Home difficulty letter tiles — readable in Dark Mode.
 - Parked Schritt 4 (Pro timer on/off + adjustable Speed Stream speed) under Later tweaks; added Post-MVP checklist section.
 - `flutter analyze` is clean and `flutter test` passes.
+
+### Session 14
+- Post-MVP polish Schritt 2: hardened Easy → Results navigation in `practice_screen.dart`.
+  - Schedule `_goToResult` via post-frame callback (avoid navigating inside the text listener).
+  - Prefer Results even if `PersonalBestStore.saveIfBest` throws; reset `_navigatedToResult` if navigation itself fails so the user isn't stuck.
+  - Remove Easy `TextField.maxLength` (engine already truncates) so IME composition can't drop the final key.
+- Medium/Pro path unchanged aside from sharing the safer `_goToResult`.
+- `dart analyze` / `flutter test` pass.
