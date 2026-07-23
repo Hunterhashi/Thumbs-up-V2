@@ -31,12 +31,12 @@
 ## Post-MVP UI polish / bugfixes
 - [x] Schritt 1: Live-HUD gelbe Badges (Dark-Mode-Lesbarkeit für Zeit/WPM/Genauigkeit)
 - [x] Schritt 2: Easy Fertigstellung → Results Navigation härten
-- [ ] Schritt 3: Easy 30s Phrase-Loop + Slide-Animation
+- [x] Schritt 3: Easy 30s Phrase-Loop + Slide-Animation
 - [ ] Schritt 4: Pro Timer An/Aus + Speed-Einstellung — **Later tweaks** (kein Code in dieser Welle)
 
 ## Assumptions (to keep it simple)
 - We'll build with **Flutter** and target **iOS + Android**.
-- **Easy**: one run = **one phrase**; user can replay to get a new phrase.
+- **Easy**: one run = **30s phrase loop** (finish a line → next line animates in; Results when the timer ends).
 - **Medium/Pro ("Speed Stream")**: one run = **time-based** (endless word flow during the timer).
 - Scoring is based on **time + per-keystroke mistakes** (so accuracy isn't always 100% even if the user corrects errors).
 - The visual design will be **based on the provided yellow "thumbs up" icon**.
@@ -381,4 +381,13 @@ These are captured as always-on Cursor rules now (see `.cursor/rules/flutter-dar
   - Prefer Results even if `PersonalBestStore.saveIfBest` throws; reset `_navigatedToResult` if navigation itself fails so the user isn't stuck.
   - Remove Easy `TextField.maxLength` (engine already truncates) so IME composition can't drop the final key.
 - Medium/Pro path unchanged aside from sharing the safer `_goToResult`.
+- `dart analyze` / `flutter test` pass.
+
+### Session 15
+- Post-MVP polish Schritt 3: Easy is now a **30s phrase loop**.
+  - `TypingEngine`: timed `runDuration` (30s), `isPhraseComplete` / `loadNextPhrase` / `finishRun` / `remaining`; stats accumulate across phrases; Results only after timeout.
+  - `PracticeScreen`: phrase complete advances + clears input; HUD shows countdown; timeout → Results.
+  - New `AnimatedPhraseStreamView`: old phrase slides up, new phrase enters from below.
+  - `ResultScreen`: Easy uses Play again (like Medium/Pro); EN/DE Easy description updated.
+- Medium/Pro Speed Stream untouched.
 - `dart analyze` / `flutter test` pass.

@@ -8,7 +8,8 @@ import 'package:thumbs_up/typing/char_status.dart';
 /// - incorrect: coral, underlined
 /// - cursor: underlined caret marker on the next character
 ///
-/// This is the Easy-mode (static) Phrase Stream. Medium/Pro use
+/// This is the Easy-mode Phrase Stream renderer. Practice wraps it in
+/// `AnimatedPhraseStreamView` for phrase-advance transitions. Medium/Pro use
 /// `SpeedStreamView` instead.
 class PhraseStreamView extends StatelessWidget {
   const PhraseStreamView({

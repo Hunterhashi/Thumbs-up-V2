@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:thumbs_up/l10n/generated/app_localizations.dart';
+import 'package:thumbs_up/models/difficulty.dart';
 import 'package:thumbs_up/models/session_result.dart';
 import 'package:thumbs_up/navigation/app_router.dart';
 import 'package:thumbs_up/screens/widgets/result_stat_card.dart';
@@ -25,6 +26,8 @@ class ResultScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isStream = result.isSpeedStream;
+    // Easy is now a timed phrase loop — same primary action as Speed Stream.
+    final isTimedRun = isStream || result.difficulty == Difficulty.easy;
 
     return Scaffold(
       body: SafeArea(
@@ -125,11 +128,11 @@ class ResultScreen extends StatelessWidget {
                     result.category,
                   ),
                   child: Text(
-                    isStream ? l10n.resultPlayAgain : l10n.resultNextPhrase,
+                    isTimedRun ? l10n.resultPlayAgain : l10n.resultNextPhrase,
                   ),
                 ),
               ),
-              if (!isStream) ...[
+              if (!isTimedRun) ...[
                 const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,

@@ -6,48 +6,69 @@ import 'package:thumbs_up/typing/char_status.dart';
 import 'package:thumbs_up/typing/haptic_engine.dart';
 import 'package:thumbs_up/typing/wpm_calculator.dart';
 
-/// Drives the Easy-mode (static Phrase Stream) typing loop.
+/// Drives the Easy-mode Phrase Stream typing loop (30s timed run).
 ///
 /// Responsibilities:
 /// - Starts the timer on the first keystroke.
 /// - Compares typed input to [targetPhrase] character-by-character.
 /// - Counts mistakes (wrong key typed, even if later corrected) and
 ///   backspaces (tracked separately, do not reduce the mistake count).
-/// - Exposes live WPM/accuracy and completion state.
+/// - On phrase match: exposes [isPhraseComplete] so the UI can advance to
+///   the next phrase without ending the run.
+/// - Ends the run when [finishRun] is called (typically after [hasTimedOut]).
 /// - Supports pausing: [elapsed] stops advancing while [isPaused], and
 ///   input is expected to be ignored by the caller during a pause.
 class TypingEngine extends ChangeNotifier {
   TypingEngine({
-    required this.targetPhrase,
+    required String this._targetPhrase,
     this.haptics = const HapticEngine(),
+    this.runDuration = const Duration(seconds: 30),
   });
 
-  final String targetPhrase;
   final HapticEngine haptics;
 
+  /// Active (unpaused) length of an Easy run from the first keystroke.
+  final Duration runDuration;
+
+  String _targetPhrase;
   final Stopwatch _stopwatch = Stopwatch();
   String _typed = '';
   int _mistakes = 0;
   int _backspaces = 0;
+  int _priorCorrectChars = 0;
   bool _started = false;
   bool _paused = false;
   bool _completed = false;
 
+  String get targetPhrase => _targetPhrase;
   String get typed => _typed;
   bool get isStarted => _started;
   bool get isPaused => _paused;
+
+  /// True when the full 30s run has been finished via [finishRun].
   bool get completed => _completed;
+
+  /// True when the current phrase is fully typed (exact match).
+  bool get isPhraseComplete =>
+      _typed.isNotEmpty && _typed == _targetPhrase && !_completed;
+
+  bool get hasTimedOut => _started && elapsed >= runDuration;
+
   int get mistakes => _mistakes;
   int get backspaces => _backspaces;
 
-  /// Time since the first keystroke, excluding any paused duration. Keeps
-  /// ticking until [completed] or [isPaused].
+  /// Time since the first keystroke, excluding any paused duration.
   Duration get elapsed => _stopwatch.elapsed;
 
+  Duration get remaining {
+    final left = runDuration - elapsed;
+    return left.isNegative ? Duration.zero : left;
+  }
+
   int get correctCharsTyped {
-    var count = 0;
-    for (var i = 0; i < _typed.length && i < targetPhrase.length; i++) {
-      if (_typed[i] == targetPhrase[i]) count++;
+    var count = _priorCorrectChars;
+    for (var i = 0; i < _typed.length && i < _targetPhrase.length; i++) {
+      if (_typed[i] == _targetPhrase[i]) count++;
     }
     return count;
   }
@@ -64,8 +85,8 @@ class TypingEngine extends ChangeNotifier {
   void onTextChanged(String newText) {
     if (_completed || _paused) return;
 
-    if (newText.length > targetPhrase.length) {
-      newText = newText.substring(0, targetPhrase.length);
+    if (newText.length > _targetPhrase.length) {
+      newText = newText.substring(0, _targetPhrase.length);
     }
 
     if (!_started && newText.isNotEmpty) {
@@ -77,7 +98,7 @@ class TypingEngine extends ChangeNotifier {
       final index = newText.length - 1;
       final typedChar = newText[index];
       final isCorrect =
-          index < targetPhrase.length && typedChar == targetPhrase[index];
+          index < _targetPhrase.length && typedChar == _targetPhrase[index];
       if (isCorrect) {
         haptics.correctKey();
       } else {
@@ -89,12 +110,29 @@ class TypingEngine extends ChangeNotifier {
     }
 
     _typed = newText;
+    notifyListeners();
+  }
 
-    if (_typed == targetPhrase) {
-      _completed = true;
-      _stopwatch.stop();
+  /// Fold the finished phrase into cumulative stats and start [next].
+  /// Keeps the stopwatch and mistake/backspace totals running.
+  void loadNextPhrase(String next) {
+    if (_completed) return;
+
+    var currentCorrect = 0;
+    for (var i = 0; i < _typed.length && i < _targetPhrase.length; i++) {
+      if (_typed[i] == _targetPhrase[i]) currentCorrect++;
     }
+    _priorCorrectChars += currentCorrect;
+    _targetPhrase = next;
+    _typed = '';
+    notifyListeners();
+  }
 
+  /// Marks the timed run finished and freezes [elapsed].
+  void finishRun() {
+    if (_completed) return;
+    _completed = true;
+    _stopwatch.stop();
     notifyListeners();
   }
 
@@ -122,6 +160,7 @@ class TypingEngine extends ChangeNotifier {
     _typed = '';
     _mistakes = 0;
     _backspaces = 0;
+    _priorCorrectChars = 0;
     _started = false;
     _paused = false;
     _completed = false;
@@ -133,9 +172,9 @@ class TypingEngine extends ChangeNotifier {
 
   /// Per-character render status for the Phrase Stream widget.
   List<CharStatus> buildCharStatuses() {
-    return List<CharStatus>.generate(targetPhrase.length, (i) {
+    return List<CharStatus>.generate(_targetPhrase.length, (i) {
       if (i < _typed.length) {
-        return _typed[i] == targetPhrase[i]
+        return _typed[i] == _targetPhrase[i]
             ? CharStatus.correct
             : CharStatus.incorrect;
       }
@@ -145,11 +184,12 @@ class TypingEngine extends ChangeNotifier {
   }
 
   SessionResult buildResult(Difficulty difficulty, PhraseCategory category) {
+    final capped = elapsed > runDuration ? runDuration : elapsed;
     return SessionResult(
       difficulty: difficulty,
       category: category,
-      phrase: targetPhrase,
-      elapsed: elapsed,
+      phrase: _targetPhrase,
+      elapsed: capped,
       correctChars: correctCharsTyped,
       mistakes: _mistakes,
       backspaces: _backspaces,

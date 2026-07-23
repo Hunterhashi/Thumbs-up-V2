@@ -12,16 +12,16 @@ import 'package:thumbs_up/models/phrase_category.dart';
 import 'package:thumbs_up/navigation/app_router.dart';
 import 'package:thumbs_up/progress/personal_best_store.dart';
 import 'package:thumbs_up/progress/settings_store.dart';
+import 'package:thumbs_up/screens/widgets/animated_phrase_stream_view.dart';
 import 'package:thumbs_up/screens/widgets/live_stats_row.dart';
-import 'package:thumbs_up/screens/widgets/phrase_stream_view.dart';
 import 'package:thumbs_up/screens/widgets/practice_paused_overlay.dart';
 import 'package:thumbs_up/screens/widgets/practice_top_bar.dart';
 import 'package:thumbs_up/screens/widgets/speed_stream_view.dart';
 import 'package:thumbs_up/typing/speed_stream_engine.dart';
 import 'package:thumbs_up/typing/typing_engine.dart';
 
-/// The typing test itself: Easy uses a static Phrase Stream; Medium/Pro use
-/// the scrolling Speed Stream treadmill.
+/// The typing test itself: Easy uses a timed Phrase Stream loop; Medium/Pro
+/// use the scrolling Speed Stream treadmill.
 class PracticeScreen extends StatefulWidget {
   const PracticeScreen({
     super.key,
@@ -35,8 +35,8 @@ class PracticeScreen extends StatefulWidget {
   /// Which phrase pack to draw from (see `PhrasePackResolver`).
   final PhraseCategory category;
 
-  /// When set on Easy runs, starts with this exact phrase (Results "Repeat").
-  /// Ignored for Speed Stream runs.
+  /// When set on Easy runs, starts with this exact phrase first
+  /// (legacy Results "Repeat"). Ignored for Speed Stream runs.
   final String? initialPhrase;
 
   @override
@@ -93,10 +93,19 @@ class _PracticeScreenState extends State<PracticeScreen>
         targetPhrase: widget.initialPhrase ?? _phraseDeck!.next(),
       );
       _hudTimer = Timer.periodic(const Duration(milliseconds: 200), (_) {
-        if (mounted &&
-            (_easyEngine?.isStarted ?? false) &&
-            !(_easyEngine?.completed ?? true) &&
-            !(_easyEngine?.isPaused ?? true)) {
+        if (!mounted) return;
+        final engine = _easyEngine;
+        if (engine == null) return;
+        if (!engine.isStarted || engine.completed || engine.isPaused) return;
+        if (engine.hasTimedOut) {
+          engine.finishRun();
+          if (!_navigatedToResult) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              _goToResult();
+            });
+          }
+        } else {
           setState(() {});
         }
       });
@@ -152,17 +161,34 @@ class _PracticeScreenState extends State<PracticeScreen>
       final engine = _easyEngine;
       if (engine == null) return;
       engine.onTextChanged(_controller.text);
-      if (engine.completed && !_navigatedToResult) {
-        // Navigate after this frame so we never push during a text-input
-        // listener (IME / maxLength edge cases can otherwise skip the hop).
+
+      if (engine.hasTimedOut && !_navigatedToResult) {
+        engine.finishRun();
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
           _goToResult();
         });
+        return;
+      }
+
+      if (engine.isPhraseComplete) {
+        _advanceEasyPhrase();
       } else {
         setState(() {});
       }
     }
+  }
+
+  void _advanceEasyPhrase() {
+    final deck = _phraseDeck;
+    final engine = _easyEngine;
+    if (deck == null || engine == null || engine.completed) return;
+
+    final next = deck.next();
+    engine.loadNextPhrase(next);
+    _controller.clear();
+    setState(() {});
+    _focusNode.requestFocus();
   }
 
   Future<void> _goToResult() async {
@@ -295,8 +321,8 @@ class _PracticeScreenState extends State<PracticeScreen>
       final engine = _easyEngine!;
       wpm = engine.liveWpm;
       accuracy = engine.liveAccuracy;
-      timeValue = engine.elapsed;
-      showRemaining = false;
+      timeValue = engine.isStarted ? engine.remaining : engine.runDuration;
+      showRemaining = true;
     }
 
     return PopScope(
@@ -342,7 +368,7 @@ class _PracticeScreenState extends State<PracticeScreen>
                         child: Center(
                           child: _isSpeedStream
                               ? SpeedStreamView(engine: _streamEngine!)
-                              : PhraseStreamView(
+                              : AnimatedPhraseStreamView(
                                   phrase: _easyEngine!.targetPhrase,
                                   statuses: _easyEngine!.buildCharStatuses(),
                                 ),
