@@ -8,8 +8,8 @@ import 'package:thumbs_up/typing/char_status.dart';
 /// - incorrect: coral, underlined
 /// - cursor: underlined caret marker on the next character
 ///
-/// This is the Easy-mode (static) Phrase Stream. The scrolling "Speed
-/// Stream" variant for Medium/Pro is a later milestone.
+/// This is the Easy-mode (static) Phrase Stream. Medium/Pro use
+/// `SpeedStreamView` instead.
 class PhraseStreamView extends StatelessWidget {
   const PhraseStreamView({
     super.key,

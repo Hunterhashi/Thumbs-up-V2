@@ -24,6 +24,8 @@ class ResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final isStream = result.isSpeedStream;
+
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -72,19 +74,47 @@ class ResultScreen extends StatelessWidget {
                 children: [
                   Expanded(
                     child: ResultStatCard(
-                      label: l10n.resultStatMistakes,
-                      value: result.mistakes.toString(),
+                      label: isStream
+                          ? l10n.resultStatCompleted
+                          : l10n.resultStatMistakes,
+                      value: isStream
+                          ? result.completedWords.toString()
+                          : result.mistakes.toString(),
                     ),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
                     child: ResultStatCard(
-                      label: l10n.resultStatBackspaces,
-                      value: result.backspaces.toString(),
+                      label: isStream
+                          ? l10n.resultStatMissed
+                          : l10n.resultStatBackspaces,
+                      value: isStream
+                          ? result.missedWords.toString()
+                          : result.backspaces.toString(),
                     ),
                   ),
                 ],
               ),
+              if (isStream) ...[
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ResultStatCard(
+                        label: l10n.resultStatMistakes,
+                        value: result.mistakes.toString(),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: ResultStatCard(
+                        label: l10n.resultStatBackspaces,
+                        value: result.backspaces.toString(),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
               const Spacer(),
               SizedBox(
                 width: double.infinity,
@@ -94,22 +124,26 @@ class ResultScreen extends StatelessWidget {
                     result.difficulty,
                     result.category,
                   ),
-                  child: Text(l10n.resultNextPhrase),
-                ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: TextButton(
-                  onPressed: () => AppRouter.repeatPhrase(
-                    context,
-                    result.difficulty,
-                    result.category,
-                    result.phrase,
+                  child: Text(
+                    isStream ? l10n.resultPlayAgain : l10n.resultNextPhrase,
                   ),
-                  child: Text(l10n.resultRepeat),
                 ),
               ),
+              if (!isStream) ...[
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () => AppRouter.repeatPhrase(
+                      context,
+                      result.difficulty,
+                      result.category,
+                      result.phrase,
+                    ),
+                    child: Text(l10n.resultRepeat),
+                  ),
+                ),
+              ],
               const SizedBox(height: 4),
               SizedBox(
                 width: double.infinity,

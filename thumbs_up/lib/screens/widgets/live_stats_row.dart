@@ -2,18 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:thumbs_up/l10n/generated/app_localizations.dart';
 import 'package:thumbs_up/theme/app_theme.dart';
 
-/// Live performance HUD shown while typing: elapsed time, WPM, accuracy.
+/// Live performance HUD shown while typing: elapsed (or remaining) time,
+/// WPM, accuracy.
 class LiveStatsRow extends StatelessWidget {
   const LiveStatsRow({
     super.key,
     required this.elapsed,
     required this.wpm,
     required this.accuracyPercent,
+    this.showAsRemaining = false,
   });
 
+  /// Elapsed time for Easy, or remaining time when [showAsRemaining] is true.
   final Duration elapsed;
   final double wpm;
   final double accuracyPercent;
+
+  /// When true, the time chip is labeled as remaining countdown.
+  final bool showAsRemaining;
 
   String _formatElapsed(Duration d) {
     final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
@@ -27,7 +33,10 @@ class LiveStatsRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _StatChip(label: l10n.statsTime, value: _formatElapsed(elapsed)),
+        _StatChip(
+          label: showAsRemaining ? l10n.statsTimeLeft : l10n.statsTime,
+          value: _formatElapsed(elapsed),
+        ),
         _StatChip(label: l10n.statsWpm, value: wpm.round().toString()),
         _StatChip(
           label: l10n.statsAccuracy,

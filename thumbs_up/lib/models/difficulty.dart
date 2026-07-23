@@ -2,9 +2,8 @@ import 'package:thumbs_up/l10n/generated/app_localizations.dart';
 
 /// Practice difficulty levels available from the home screen.
 ///
-/// `easy` uses a static Phrase Stream (no time pressure besides the run
-/// itself). `medium` and `pro` are the "Speed Stream" treadmill mode and are
-/// implemented in a later milestone.
+/// `easy` uses a static Phrase Stream. `medium` and `pro` use the scrolling
+/// "Speed Stream" treadmill (see `SpeedStreamEngine`).
 ///
 /// Display strings take [AppLocalizations] rather than being plain getters,
 /// since they need to reflect the user's chosen language.
@@ -31,6 +30,7 @@ enum Difficulty {
     Difficulty.pro => l10n.difficultyProDescription,
   };
 
-  /// Speed Stream (Medium/Pro) is implemented in a later milestone.
-  bool get isAvailable => this == Difficulty.easy;
+  /// All difficulties are playable (Easy = static Phrase Stream; Medium/Pro
+  /// = Speed Stream treadmill).
+  bool get isAvailable => true;
 }

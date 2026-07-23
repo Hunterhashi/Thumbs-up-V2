@@ -79,6 +79,7 @@
   "onboardingGotIt": "Got it",
 
   "statsTime": "Time",
+  "statsTimeLeft": "Left",
   "statsWpm": "WPM",
   "statsAccuracy": "Accuracy",
 
@@ -101,7 +102,10 @@
   "resultNewBestBadge": "New personal best",
   "resultStatMistakes": "Mistakes",
   "resultStatBackspaces": "Backspaces",
+  "resultStatCompleted": "Completed",
+  "resultStatMissed": "Missed",
   "resultNextPhrase": "Next phrase",
+  "resultPlayAgain": "Play again",
   "resultRepeat": "Repeat",
   "resultChangeDifficulty": "Change difficulty",
 

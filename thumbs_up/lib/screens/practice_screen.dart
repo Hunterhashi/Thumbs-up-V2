@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:thumbs_up/data/phrase_packs.dart';
 import 'package:thumbs_up/l10n/generated/app_localizations.dart';
 import 'package:thumbs_up/lesson/phrase_deck.dart';
+import 'package:thumbs_up/lesson/word_deck.dart';
 import 'package:thumbs_up/models/difficulty.dart';
 import 'package:thumbs_up/models/phrase_category.dart';
 import 'package:thumbs_up/navigation/app_router.dart';
@@ -13,13 +15,12 @@ import 'package:thumbs_up/screens/widgets/live_stats_row.dart';
 import 'package:thumbs_up/screens/widgets/phrase_stream_view.dart';
 import 'package:thumbs_up/screens/widgets/practice_paused_overlay.dart';
 import 'package:thumbs_up/screens/widgets/practice_top_bar.dart';
+import 'package:thumbs_up/screens/widgets/speed_stream_view.dart';
+import 'package:thumbs_up/typing/speed_stream_engine.dart';
 import 'package:thumbs_up/typing/typing_engine.dart';
 
-/// The typing test itself: shows the target phrase, captures input via a
-/// hidden text field, and shows a live WPM/accuracy HUD.
-///
-/// Only [Difficulty.easy] is playable today; the scrolling "Speed Stream"
-/// for Medium/Pro is implemented in a later milestone.
+/// The typing test itself: Easy uses a static Phrase Stream; Medium/Pro use
+/// the scrolling Speed Stream treadmill.
 class PracticeScreen extends StatefulWidget {
   const PracticeScreen({
     super.key,
@@ -33,93 +34,189 @@ class PracticeScreen extends StatefulWidget {
   /// Which phrase pack to draw from (see `lib/data/phrase_packs.dart`).
   final PhraseCategory category;
 
-  /// When set, the run starts with this exact phrase instead of drawing a
-  /// new one from the deck (used by Results' "Repeat" action).
+  /// When set on Easy runs, starts with this exact phrase (Results "Repeat").
+  /// Ignored for Speed Stream runs.
   final String? initialPhrase;
 
   @override
   State<PracticeScreen> createState() => _PracticeScreenState();
 }
 
-class _PracticeScreenState extends State<PracticeScreen> {
-  late final PhraseDeck _deck;
-  late TypingEngine _engine;
+class _PracticeScreenState extends State<PracticeScreen>
+    with SingleTickerProviderStateMixin {
+  late final bool _isSpeedStream;
+  PhraseDeck? _phraseDeck;
+  TypingEngine? _easyEngine;
+  SpeedStreamEngine? _streamEngine;
+  Ticker? _streamTicker;
+  Duration _lastTickElapsed = Duration.zero;
+
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
-  Timer? _tickTimer;
+  Timer? _hudTimer;
   bool _navigatedToResult = false;
+
+  bool get _isPaused => _isSpeedStream
+      ? (_streamEngine?.isPaused ?? false)
+      : (_easyEngine?.isPaused ?? false);
+
+  bool get _isStarted => _isSpeedStream
+      ? (_streamEngine?.isStarted ?? false)
+      : (_easyEngine?.isStarted ?? false);
+
+  bool get _isCompleted => _isSpeedStream
+      ? (_streamEngine?.completed ?? false)
+      : (_easyEngine?.completed ?? false);
 
   @override
   void initState() {
     super.initState();
-    _deck = PhraseDeck(easyPhrasePacks[widget.category]!);
-    _engine = TypingEngine(targetPhrase: widget.initialPhrase ?? _deck.next());
-    _controller.addListener(_onControllerChanged);
+    _isSpeedStream = widget.difficulty != Difficulty.easy;
+    final phrases = easyPhrasePacks[widget.category]!;
 
+    if (_isSpeedStream) {
+      _streamEngine = SpeedStreamEngine(
+        wordDeck: WordDeck(phrases),
+        speedPxPerSecond: SpeedStreamEngine.speedFor(widget.difficulty),
+      );
+      _streamEngine!.addListener(_onStreamChanged);
+      _streamTicker = createTicker(_onStreamTick);
+      _streamTicker!.start();
+    } else {
+      _phraseDeck = PhraseDeck(phrases);
+      _easyEngine = TypingEngine(
+        targetPhrase: widget.initialPhrase ?? _phraseDeck!.next(),
+      );
+      _hudTimer = Timer.periodic(const Duration(milliseconds: 200), (_) {
+        if (mounted &&
+            (_easyEngine?.isStarted ?? false) &&
+            !(_easyEngine?.completed ?? true) &&
+            !(_easyEngine?.isPaused ?? true)) {
+          setState(() {});
+        }
+      });
+    }
+
+    _controller.addListener(_onControllerChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
-    });
-
-    // Keeps the visible timer/WPM ticking even between keystrokes. Skips
-    // rebuilding while paused, since elapsed/WPM are frozen anyway.
-    _tickTimer = Timer.periodic(const Duration(milliseconds: 200), (_) {
-      if (mounted &&
-          _engine.isStarted &&
-          !_engine.completed &&
-          !_engine.isPaused) {
-        setState(() {});
-      }
     });
   }
 
   @override
   void dispose() {
     _controller.removeListener(_onControllerChanged);
+    _streamEngine?.removeListener(_onStreamChanged);
+    _streamTicker?.dispose();
     _controller.dispose();
     _focusNode.dispose();
-    _tickTimer?.cancel();
+    _hudTimer?.cancel();
+    _streamEngine?.dispose();
+    _easyEngine?.dispose();
     super.dispose();
   }
 
-  void _onControllerChanged() {
-    _engine.onTextChanged(_controller.text);
-    if (_engine.completed && !_navigatedToResult) {
-      _navigatedToResult = true;
-      Future<void>.delayed(const Duration(milliseconds: 250), () async {
-        if (!mounted) return;
-        final result = _engine.buildResult(widget.difficulty, widget.category);
-        final isNewBest = await PersonalBestStore.saveIfBest(result);
-        if (!mounted) return;
-        AppRouter.toResult(context, result, isNewBest: isNewBest);
-      });
+  void _onStreamTick(Duration elapsed) {
+    final engine = _streamEngine;
+    if (engine == null) return;
+    final dt = (elapsed - _lastTickElapsed).inMicroseconds / 1e6;
+    _lastTickElapsed = elapsed;
+    if (dt > 0 && dt < 0.25) {
+      engine.tick(dt);
     }
-    setState(() {});
+  }
+
+  void _onStreamChanged() {
+    if (!mounted) return;
+    if (_streamEngine?.completed == true && !_navigatedToResult) {
+      _goToResult();
+    } else {
+      setState(() {});
+    }
+  }
+
+  void _onControllerChanged() {
+    if (_isSpeedStream) {
+      final engine = _streamEngine;
+      if (engine == null) return;
+      final cleared = engine.onTextChanged(_controller.text);
+      if (cleared && _controller.text.isNotEmpty) {
+        _controller.clear();
+      }
+    } else {
+      final engine = _easyEngine;
+      if (engine == null) return;
+      engine.onTextChanged(_controller.text);
+      if (engine.completed && !_navigatedToResult) {
+        _goToResult();
+      } else {
+        setState(() {});
+      }
+    }
+  }
+
+  Future<void> _goToResult() async {
+    if (_navigatedToResult) return;
+    _navigatedToResult = true;
+    await Future<void>.delayed(const Duration(milliseconds: 250));
+    if (!mounted) return;
+
+    final result = _isSpeedStream
+        ? _streamEngine!.buildResult(widget.difficulty, widget.category)
+        : _easyEngine!.buildResult(widget.difficulty, widget.category);
+    final isNewBest = await PersonalBestStore.saveIfBest(result);
+    if (!mounted) return;
+    AppRouter.toResult(context, result, isNewBest: isNewBest);
   }
 
   void _restart() {
+    final phrases = easyPhrasePacks[widget.category]!;
     setState(() {
       _controller.clear();
-      _engine = TypingEngine(targetPhrase: _deck.next());
       _navigatedToResult = false;
+      if (_isSpeedStream) {
+        _streamEngine?.removeListener(_onStreamChanged);
+        _streamEngine?.dispose();
+        _lastTickElapsed = Duration.zero;
+        _streamEngine = SpeedStreamEngine(
+          wordDeck: WordDeck(phrases),
+          speedPxPerSecond: SpeedStreamEngine.speedFor(widget.difficulty),
+        );
+        _streamEngine!.addListener(_onStreamChanged);
+      } else {
+        _easyEngine = TypingEngine(targetPhrase: _phraseDeck!.next());
+      }
     });
     _focusNode.requestFocus();
   }
 
   void _togglePause() {
-    if (_engine.isPaused) {
-      _engine.resume();
-      setState(() {});
-      _focusNode.requestFocus();
+    if (_isSpeedStream) {
+      final engine = _streamEngine!;
+      if (engine.isPaused) {
+        engine.resume();
+        _focusNode.requestFocus();
+      } else {
+        _focusNode.unfocus();
+        engine.pause();
+      }
     } else {
-      _focusNode.unfocus();
-      setState(() {
-        _engine.pause();
-      });
+      final engine = _easyEngine!;
+      if (engine.isPaused) {
+        engine.resume();
+        setState(() {});
+        _focusNode.requestFocus();
+      } else {
+        _focusNode.unfocus();
+        setState(() {
+          engine.pause();
+        });
+      }
     }
   }
 
   Future<bool> _confirmExitIfNeeded() async {
-    final inProgress = _engine.isStarted && !_engine.completed;
+    final inProgress = _isStarted && !_isCompleted;
     if (!inProgress) return true;
 
     final l10n = AppLocalizations.of(context);
@@ -151,8 +248,27 @@ class _PracticeScreenState extends State<PracticeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isPaused = _engine.isPaused;
-    final canTogglePause = _engine.isStarted && !_engine.completed;
+    final isPaused = _isPaused;
+    final canTogglePause = _isStarted && !_isCompleted;
+    final l10n = AppLocalizations.of(context);
+
+    final double wpm;
+    final double accuracy;
+    final Duration timeValue;
+    final bool showRemaining;
+    if (_isSpeedStream) {
+      final engine = _streamEngine!;
+      wpm = engine.liveWpm;
+      accuracy = engine.liveAccuracy;
+      timeValue = engine.isStarted ? engine.remaining : engine.runDuration;
+      showRemaining = true;
+    } else {
+      final engine = _easyEngine!;
+      wpm = engine.liveWpm;
+      accuracy = engine.liveAccuracy;
+      timeValue = engine.elapsed;
+      showRemaining = false;
+    }
 
     return PopScope(
       canPop: false,
@@ -178,9 +294,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
                     children: [
                       const SizedBox(height: 8),
                       PracticeTopBar(
-                        title: widget.difficulty.label(
-                          AppLocalizations.of(context),
-                        ),
+                        title: widget.difficulty.label(l10n),
                         onBack: () => _onBack(context),
                         onRestart: _restart,
                         isPaused: isPaused,
@@ -189,22 +303,22 @@ class _PracticeScreenState extends State<PracticeScreen> {
                       if (SettingsStore.current.hudEnabled) ...[
                         const SizedBox(height: 12),
                         LiveStatsRow(
-                          elapsed: _engine.elapsed,
-                          wpm: _engine.liveWpm,
-                          accuracyPercent: _engine.liveAccuracy,
+                          elapsed: timeValue,
+                          wpm: wpm,
+                          accuracyPercent: accuracy,
+                          showAsRemaining: showRemaining,
                         ),
                       ],
                       Expanded(
                         child: Center(
-                          child: PhraseStreamView(
-                            phrase: _engine.targetPhrase,
-                            statuses: _engine.buildCharStatuses(),
-                          ),
+                          child: _isSpeedStream
+                              ? SpeedStreamView(engine: _streamEngine!)
+                              : PhraseStreamView(
+                                  phrase: _easyEngine!.targetPhrase,
+                                  statuses: _easyEngine!.buildCharStatuses(),
+                                ),
                         ),
                       ),
-                      // Hidden input: captures raw keystrokes without ever
-                      // showing a visible cursor/selection to the user, so the
-                      // Phrase Stream above is the only thing they look at.
                       Opacity(
                         opacity: 0,
                         child: SizedBox(
@@ -218,7 +332,9 @@ class _PracticeScreenState extends State<PracticeScreen> {
                             enableIMEPersonalizedLearning: false,
                             textCapitalization: TextCapitalization.none,
                             keyboardType: TextInputType.visiblePassword,
-                            maxLength: _engine.targetPhrase.length,
+                            maxLength: _isSpeedStream
+                                ? (_streamEngine?.activeWord.length ?? 32)
+                                : _easyEngine!.targetPhrase.length,
                             decoration: const InputDecoration(
                               border: InputBorder.none,
                               isCollapsed: true,

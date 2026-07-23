@@ -11,8 +11,7 @@ import 'package:thumbs_up/screens/widgets/phrase_category_selector.dart';
 
 /// Lets the user pick a difficulty, then starts a Practice run.
 ///
-/// Medium/Pro ("Speed Stream") are shown but not yet playable — they are a
-/// later milestone (see plan: "Medium/Pro: Dynamic Phrase Stream").
+/// Easy uses a static Phrase Stream; Medium/Pro use Speed Stream.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -51,16 +50,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onSelectDifficulty(BuildContext context, Difficulty difficulty) {
-    if (!difficulty.isAvailable) {
-      final l10n = AppLocalizations.of(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.comingSoonSnackbar(difficulty.label(l10n))),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
     AppRouter.toPractice(context, difficulty, _selectedCategory);
   }
 

@@ -11,14 +11,18 @@ class SessionResult {
     required this.correctChars,
     required this.mistakes,
     required this.backspaces,
+    this.completedWords = 0,
+    this.missedWords = 0,
   });
 
   final Difficulty difficulty;
   final PhraseCategory category;
+
+  /// Easy: the phrase just typed. Speed Stream: a short label (not replayed).
   final String phrase;
   final Duration elapsed;
 
-  /// Number of characters typed correctly (final, matched text length).
+  /// Number of characters typed correctly (matched against targets).
   final int correctChars;
 
   /// Number of wrong keystrokes made while typing (even if later corrected).
@@ -27,6 +31,16 @@ class SessionResult {
   /// Number of backspace presses (tracked separately, does not affect
   /// [mistakes]).
   final int backspaces;
+
+  /// Speed Stream only: words typed fully before they scrolled off.
+  final int completedWords;
+
+  /// Speed Stream only: words that exited the left edge unfinished.
+  final int missedWords;
+
+  /// Whether this result came from a Medium/Pro Speed Stream run.
+  bool get isSpeedStream =>
+      difficulty == Difficulty.medium || difficulty == Difficulty.pro;
 
   /// Total keystrokes considered for accuracy: correct chars + mistakes.
   int get totalKeystrokes => correctChars + mistakes;

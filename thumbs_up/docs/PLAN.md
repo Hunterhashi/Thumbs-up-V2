@@ -23,8 +23,8 @@
 - [x] Settings (E): haptics on/off, live HUD on/off, theme mode (system/light/dark)
 - [x] Phrase packs / categories (Easy: Everyday + Punctuation & Numbers, picked on Home)
 - [x] Localization (English + German UI strings + language selector in Settings; phrase content still English-only)
-- [ ] Sentence library (Tatoeba-based, large EN/DE pool, filtered + attributed)
-- [ ] Medium/Pro "Speed Stream" (treadmill) mode + scoring, speed tuned on-device
+- [ ] Sentence library (Tatoeba-based, large EN/DE pool, filtered + attributed) — parked under Later tweaks; next content milestone after Speed Stream
+- [x] Medium/Pro "Speed Stream" (treadmill) mode + scoring, speed tuned on-device
 - [ ] Phrase lists + scoring logic per difficulty (beyond the Easy starter list)
 - [x] Verification: `flutter analyze` clean, widget test passes, app boots/runs
 
@@ -237,7 +237,7 @@ These are captured as always-on Cursor rules now (see `.cursor/rules/flutter-dar
 - **Wordmark**: replace the `RichText` logo with a final wordmark asset (transparent PNG/SVG, no background) and pick the final typography.
 - **Package/bundle id**: set a final reverse-DNS id before store release.
 - **Speed Stream tuning**: tune scroll speeds after on-device testing; optionally add a 60s toggle.
-- **Sentence library**: expand and refine filters/packs so sentences feel human; persist the "deck index" so repeats stay rare.
+- **Sentence library (Tatoeba — next content milestone after Speed Stream)**: replace starter phrase lists with a large EN/DE pool from Tatoeba CC0 (`eng` + `deu`), filtered to Easy constraints (~15–60 chars, conversational, minimal symbols). If CC0 volume is too small, fall back to broader CC BY + an in-app About / Credits attribution screen. Persist the shuffle-once deck index so repeats stay rare.
 - **Phrase packs**: consider persisting the last-picked category (like theme mode) and tracking personal bests per `(difficulty, category)` instead of difficulty alone.
 - **Scoring + start UX**: revisit mistake/backspace rules after playtesting; decide if a short countdown or tap-to-start is wanted.
 - **Accessibility**: add reduce-motion fallback for Speed Stream; color-blind safe cues; Dynamic Type sizing.
@@ -327,4 +327,17 @@ These are captured as always-on Cursor rules now (see `.cursor/rules/flutter-dar
   - `lib/main.dart`: `MaterialApp` now wires `localizationsDelegates`/`supportedLocales`/`locale` (from `SettingsStore`) and uses `onGenerateTitle` for the window/task-switcher title.
   - `lib/screens/settings_screen.dart`: new "Language" section with a `SegmentedButton<Locale?>` (System/English/German), same visual style as the existing theme-mode selector.
   - Swapped every remaining hardcoded `Text('...')`/dialog/snackbar/tooltip string across `HomeScreen`, `DifficultyCard`, `PhraseCategorySelector`, `OnboardingTipsDialog`, `LiveStatsRow`, `ResultScreen`, `PracticeScreen` (exit-confirm dialog + top bar title), and `PracticePausedOverlay` for `AppLocalizations.of(context)` lookups.
+- `flutter analyze` is clean, `flutter test` passes, and the app boots on macOS desktop with no crashes.
+
+### Session 9
+- Implemented Medium/Pro **Speed Stream** (treadmill mode) and parked the Tatoeba sentence library under Later tweaks as the next content milestone.
+  - **Later tweaks**: expanded the sentence-library bullet to explicitly name Tatoeba CC0 EN/DE filtering, CC BY fallback + About/Credits, and persisted deck index.
+  - New `lib/lesson/word_deck.dart`: flattens category phrase packs into words, shuffle-once, auto-refills for endless 30s runs.
+  - New `lib/typing/speed_stream_engine.dart`: token queue with measured widths; `tick(dt)` scrolls left at Medium `80` / Pro `140` px/s; complete vs miss; pause/resume; ends after 30s from first keystroke; builds `SessionResult` with `completedWords`/`missedWords`.
+  - New `lib/screens/widgets/speed_stream_view.dart`: clipped strip + `CustomPainter` (interpuncts, active-word char statuses with underline cues).
+  - `SessionResult`: added `completedWords`/`missedWords` + `isSpeedStream` helper.
+  - `PracticeScreen`: branches Easy (`TypingEngine` + `PhraseStreamView`) vs Medium/Pro (`SpeedStreamEngine` + `Ticker` + `SpeedStreamView`); HUD shows remaining time for stream runs.
+  - `Difficulty.isAvailable` is always true; Home no longer shows the "coming soon" snackbar.
+  - `ResultScreen`: stream runs show Completed/Missed (+ mistakes/backspaces); primary action is "Play again" (same difficulty+category); Easy keeps Next phrase / Repeat.
+  - Localized new strings (`statsTimeLeft`, `resultStatCompleted`, `resultStatMissed`, `resultPlayAgain`) in EN/DE ARBs.
 - `flutter analyze` is clean, `flutter test` passes, and the app boots on macOS desktop with no crashes.
