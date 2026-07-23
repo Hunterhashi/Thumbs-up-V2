@@ -28,6 +28,12 @@
 - [x] Phrase lists + scoring logic per difficulty (beyond the Easy starter list) — Medium ≥4 / Pro ≥6 word floors on Speed Stream; same scoring formulas
 - [x] Verification: `flutter analyze` clean, widget test passes, app boots/runs
 
+## Post-MVP UI polish / bugfixes
+- [x] Schritt 1: Live-HUD gelbe Badges (Dark-Mode-Lesbarkeit für Zeit/WPM/Genauigkeit)
+- [ ] Schritt 2: Easy Fertigstellung → Results Navigation härten
+- [ ] Schritt 3: Easy 30s Phrase-Loop + Slide-Animation
+- [ ] Schritt 4: Pro Timer An/Aus + Speed-Einstellung — **Later tweaks** (kein Code in dieser Welle)
+
 ## Assumptions (to keep it simple)
 - We'll build with **Flutter** and target **iOS + Android**.
 - **Easy**: one run = **one phrase**; user can replay to get a new phrase.
@@ -237,6 +243,7 @@ These are captured as always-on Cursor rules now (see `.cursor/rules/flutter-dar
 - **Wordmark**: replace the `RichText` logo with a final wordmark asset (transparent PNG/SVG, no background) and pick the final typography.
 - **Package/bundle id**: set a final reverse-DNS id before store release.
 - **Speed Stream tuning**: tune scroll speeds after on-device testing; optionally add a 60s toggle.
+- **Pro controls**: Timer on/off (endless Speed Stream when off) + user-adjustable scroll speed; persist in `SettingsStore` and wire into `SpeedStreamEngine(speedPxPerSecond:, runDuration:)` (constructor already accepts both; today Pro is fixed at 140 px/s / 30s).
 - **Sentence library**: Everyday EN/DE Tatoeba pools ship as offline JSON (`assets/phrases/`); regenerate with `dart run tool/build_tatoeba_everyday.dart`. Still pending: German Punctuation pack, persist deck index, optional CC BY About screen polish.
 - **Phrase packs**: consider persisting the last-picked category (like theme mode) and tracking personal bests per `(difficulty, category)` instead of difficulty alone.
 - **Scoring + start UX**: revisit mistake/backspace rules after playtesting; decide if a short countdown or tap-to-start is wanted.
@@ -361,4 +368,9 @@ These are captured as always-on Cursor rules now (see `.cursor/rules/flutter-dar
 ### Session 12
 - Fixed a crash on cold-launching a Medium/Pro (Speed Stream) run: the hidden capture `TextField` in `PracticeScreen` computed `maxLength` as `_streamEngine?.activeWord.length ?? 32`, but `SpeedStreamEngine.activeWord` returns `''` (length `0`, not `null`) until `SpeedStreamView` seeds its tokens via a post-frame callback — so the very first synchronous build hit Flutter's `maxLength > 0` assertion and threw. Hot reload/hot restart could mask this by reusing already-seeded engine state from a prior run, which is why it looked intermittent ("worked an hour ago").
   - Changed the `maxLength` expression to fall back to `32` whenever `activeWord` is empty (not only when the engine itself is null).
+- `flutter analyze` is clean and `flutter test` passes.
+
+### Session 13
+- Post-MVP polish Schritt 1: Live HUD (Zeit/WPM/Genauigkeit) in `live_stats_row.dart` uses yellow badges (`brandYellow` @ 0.9, radius 16, matteBlack text) matching Home difficulty letter tiles — readable in Dark Mode.
+- Parked Schritt 4 (Pro timer on/off + adjustable Speed Stream speed) under Later tweaks; added Post-MVP checklist section.
 - `flutter analyze` is clean and `flutter test` passes.
