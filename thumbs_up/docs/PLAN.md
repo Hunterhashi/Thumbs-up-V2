@@ -25,7 +25,7 @@
 - [x] Localization (English + German UI strings + language selector in Settings; phrase content still English-only)
 - [x] Sentence library (Tatoeba Everyday EN/DE offline JSON; Punctuation pack remains hand-written EN)
 - [x] Medium/Pro "Speed Stream" (treadmill) mode + scoring, speed tuned on-device
-- [ ] Phrase lists + scoring logic per difficulty (beyond the Easy starter list)
+- [x] Phrase lists + scoring logic per difficulty (beyond the Easy starter list) — Medium ≥4 / Pro ≥6 word floors on Speed Stream; same scoring formulas
 - [x] Verification: `flutter analyze` clean, widget test passes, app boots/runs
 
 ## Assumptions (to keep it simple)
@@ -349,4 +349,11 @@ These are captured as always-on Cursor rules now (see `.cursor/rules/flutter-dar
   - New `lib/data/phrase_pack_resolver.dart`: loads/caches JSON via `rootBundle`; Everyday language follows UI locale (`de` → DE, else EN); Punctuation & Numbers stays hand-written EN; soft-fallback to `easy_phrases_en.dart` if an asset fails.
   - `main.dart` prefetches Everyday packs after `SettingsStore.load()`; `PracticeScreen` uses `PhrasePackResolver.phrases` (incl. Restart).
   - Settings Credits one-liner (localized) attributing Tatoeba EN CC0 / DE CC BY.
+- `flutter analyze` is clean, `flutter test` passes.
+
+### Session 11
+- Closed the last MVP checklist item: **difficulty-tiered Speed Stream word pools** (content harder, scoring formulas unchanged).
+  - New `lib/lesson/difficulty_word_filter.dart`: Medium keeps words length ≥ 4, Pro ≥ 6; falls back to the full flatten if fewer than 40 words remain.
+  - `WordDeck`: exposed `flatten` + `fromWords` constructor so Practice can pass a pre-filtered list.
+  - `PracticeScreen` Speed Stream init/restart now builds `WordDeck.fromWords(DifficultyWordFilter.wordsForDifficulty(...))`; Easy phrase path unchanged.
 - `flutter analyze` is clean, `flutter test` passes.

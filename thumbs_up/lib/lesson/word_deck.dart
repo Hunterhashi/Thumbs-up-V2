@@ -4,9 +4,15 @@ import 'dart:math';
 /// shuffle-once cycle that refills when exhausted — enough for an endless
 /// 30s Speed Stream run without obvious short-term repeats.
 class WordDeck {
+  /// Builds a deck by splitting [phrases] on whitespace.
   WordDeck(List<String> phrases, {Random? random})
+    : this.fromWords(flatten(phrases), random: random);
+
+  /// Builds a deck from an already-flattened word list (e.g. after
+  /// [DifficultyWordFilter.wordsForDifficulty]).
+  WordDeck.fromWords(List<String> words, {Random? random})
     : _random = random ?? Random(),
-      _words = _flatten(phrases) {
+      _words = List<String>.from(words) {
     _reshuffle();
   }
 
@@ -15,7 +21,8 @@ class WordDeck {
   List<String> _order = [];
   int _cursor = 0;
 
-  static List<String> _flatten(List<String> phrases) {
+  /// Splits each phrase on whitespace into non-empty word tokens.
+  static List<String> flatten(List<String> phrases) {
     final words = <String>[];
     for (final phrase in phrases) {
       for (final part in phrase.split(RegExp(r'\s+'))) {

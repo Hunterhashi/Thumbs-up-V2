@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:thumbs_up/data/phrase_pack_resolver.dart';
 import 'package:thumbs_up/l10n/generated/app_localizations.dart';
+import 'package:thumbs_up/lesson/difficulty_word_filter.dart';
 import 'package:thumbs_up/lesson/phrase_deck.dart';
 import 'package:thumbs_up/lesson/word_deck.dart';
 import 'package:thumbs_up/models/difficulty.dart';
@@ -75,8 +76,12 @@ class _PracticeScreenState extends State<PracticeScreen>
     final phrases = PhrasePackResolver.phrases(widget.category);
 
     if (_isSpeedStream) {
+      final words = DifficultyWordFilter.wordsForDifficulty(
+        phrases,
+        widget.difficulty,
+      );
       _streamEngine = SpeedStreamEngine(
-        wordDeck: WordDeck(phrases),
+        wordDeck: WordDeck.fromWords(words),
         speedPxPerSecond: SpeedStreamEngine.speedFor(widget.difficulty),
       );
       _streamEngine!.addListener(_onStreamChanged);
@@ -181,8 +186,12 @@ class _PracticeScreenState extends State<PracticeScreen>
         _streamEngine?.removeListener(_onStreamChanged);
         _streamEngine?.dispose();
         _lastTickElapsed = Duration.zero;
+        final words = DifficultyWordFilter.wordsForDifficulty(
+          phrases,
+          widget.difficulty,
+        );
         _streamEngine = SpeedStreamEngine(
-          wordDeck: WordDeck(phrases),
+          wordDeck: WordDeck.fromWords(words),
           speedPxPerSecond: SpeedStreamEngine.speedFor(widget.difficulty),
         );
         _streamEngine!.addListener(_onStreamChanged);
