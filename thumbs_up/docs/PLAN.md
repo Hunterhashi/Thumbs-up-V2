@@ -357,3 +357,8 @@ These are captured as always-on Cursor rules now (see `.cursor/rules/flutter-dar
   - `WordDeck`: exposed `flatten` + `fromWords` constructor so Practice can pass a pre-filtered list.
   - `PracticeScreen` Speed Stream init/restart now builds `WordDeck.fromWords(DifficultyWordFilter.wordsForDifficulty(...))`; Easy phrase path unchanged.
 - `flutter analyze` is clean, `flutter test` passes.
+
+### Session 12
+- Fixed a crash on cold-launching a Medium/Pro (Speed Stream) run: the hidden capture `TextField` in `PracticeScreen` computed `maxLength` as `_streamEngine?.activeWord.length ?? 32`, but `SpeedStreamEngine.activeWord` returns `''` (length `0`, not `null`) until `SpeedStreamView` seeds its tokens via a post-frame callback — so the very first synchronous build hit Flutter's `maxLength > 0` assertion and threw. Hot reload/hot restart could mask this by reusing already-seeded engine state from a prior run, which is why it looked intermittent ("worked an hour ago").
+  - Changed the `maxLength` expression to fall back to `32` whenever `activeWord` is empty (not only when the engine itself is null).
+- `flutter analyze` is clean and `flutter test` passes.

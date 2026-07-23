@@ -346,7 +346,10 @@ class _PracticeScreenState extends State<PracticeScreen>
                             textCapitalization: TextCapitalization.none,
                             keyboardType: TextInputType.visiblePassword,
                             maxLength: _isSpeedStream
-                                ? (_streamEngine?.activeWord.length ?? 32)
+                                ? (_streamEngine != null &&
+                                          _streamEngine!.activeWord.isNotEmpty
+                                      ? _streamEngine!.activeWord.length
+                                      : 32)
                                 : _easyEngine!.targetPhrase.length,
                             decoration: const InputDecoration(
                               border: InputBorder.none,
