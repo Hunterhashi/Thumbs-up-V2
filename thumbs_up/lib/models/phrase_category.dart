@@ -4,7 +4,7 @@ import 'package:thumbs_up/l10n/generated/app_localizations.dart';
 /// independent of [Difficulty].
 ///
 /// Only Easy uses these today; Medium/Pro ("Speed Stream") are expected to
-/// reuse the same packs once that mode ships (see `lib/data/phrase_packs.dart`).
+/// reuse the same packs once that mode ships (see `PhrasePackResolver`).
 ///
 /// Display strings take [AppLocalizations] rather than being plain getters,
 /// since they need to reflect the user's chosen language.

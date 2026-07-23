@@ -71,6 +71,7 @@
   "languageSystem": "System",
   "languageEnglish": "English",
   "languageGerman": "German",
+  "settingsCredits": "Everyday phrases from Tatoeba (EN: CC0, DE: CC BY 2.0 FR).",
 
   "onboardingTitle": "Welcome to Thumbs Up",
   "onboardingTip1": "Pick a difficulty, then type the highlighted phrase as fast and accurately as you can.",

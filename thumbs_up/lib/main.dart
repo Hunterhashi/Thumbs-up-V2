@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:thumbs_up/data/phrase_pack_resolver.dart';
 import 'package:thumbs_up/l10n/generated/app_localizations.dart';
 import 'package:thumbs_up/progress/settings_store.dart';
 import 'package:thumbs_up/screens/launch_screen.dart';
@@ -7,6 +8,7 @@ import 'package:thumbs_up/theme/app_theme.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SettingsStore.load();
+  await PhrasePackResolver.prefetch();
   runApp(const ThumbsUpApp());
 }
 

@@ -1,0 +1,25 @@
+{
+  "generatedAt": "2026-07-23T10:48:17.783785Z",
+  "sourceIndex": "https://downloads.tatoeba.org/exports/per_language/",
+  "languages": {
+    "en": {
+      "license": "CC0 1.0",
+      "url": "https://downloads.tatoeba.org/exports/per_language/eng/eng_sentences_CC0.tsv.bz2",
+      "filtered": 24428,
+      "shipped": 800
+    },
+    "de": {
+      "license": "CC BY 2.0 FR",
+      "url": "https://downloads.tatoeba.org/exports/per_language/deu/deu_sentences.tsv.bz2",
+      "filtered": 613076,
+      "shipped": 800
+    }
+  },
+  "filter": {
+    "minLength": 15,
+    "maxLength": 60,
+    "noDigits": true,
+    "lowercase": true,
+    "cap": 800
+  }
+}

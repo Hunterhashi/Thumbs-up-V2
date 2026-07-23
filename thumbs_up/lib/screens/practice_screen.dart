@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:thumbs_up/data/phrase_packs.dart';
+import 'package:thumbs_up/data/phrase_pack_resolver.dart';
 import 'package:thumbs_up/l10n/generated/app_localizations.dart';
 import 'package:thumbs_up/lesson/phrase_deck.dart';
 import 'package:thumbs_up/lesson/word_deck.dart';
@@ -31,7 +31,7 @@ class PracticeScreen extends StatefulWidget {
 
   final Difficulty difficulty;
 
-  /// Which phrase pack to draw from (see `lib/data/phrase_packs.dart`).
+  /// Which phrase pack to draw from (see `PhrasePackResolver`).
   final PhraseCategory category;
 
   /// When set on Easy runs, starts with this exact phrase (Results "Repeat").
@@ -72,7 +72,7 @@ class _PracticeScreenState extends State<PracticeScreen>
   void initState() {
     super.initState();
     _isSpeedStream = widget.difficulty != Difficulty.easy;
-    final phrases = easyPhrasePacks[widget.category]!;
+    final phrases = PhrasePackResolver.phrases(widget.category);
 
     if (_isSpeedStream) {
       _streamEngine = SpeedStreamEngine(
@@ -170,7 +170,10 @@ class _PracticeScreenState extends State<PracticeScreen>
   }
 
   void _restart() {
-    final phrases = easyPhrasePacks[widget.category]!;
+    final phrases = PhrasePackResolver.phrases(
+      widget.category,
+      uiLocale: Localizations.localeOf(context),
+    );
     setState(() {
       _controller.clear();
       _navigatedToResult = false;
@@ -184,6 +187,7 @@ class _PracticeScreenState extends State<PracticeScreen>
         );
         _streamEngine!.addListener(_onStreamChanged);
       } else {
+        _phraseDeck = PhraseDeck(phrases);
         _easyEngine = TypingEngine(targetPhrase: _phraseDeck!.next());
       }
     });

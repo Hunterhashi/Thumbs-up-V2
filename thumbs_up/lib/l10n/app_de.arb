@@ -40,6 +40,7 @@
   "languageSystem": "System",
   "languageEnglish": "Englisch",
   "languageGerman": "Deutsch",
+  "settingsCredits": "Alltagssätze von Tatoeba (EN: CC0, DE: CC BY 2.0 FR).",
 
   "onboardingTitle": "Willkommen bei Thumbs Up",
   "onboardingTip1": "Wähle einen Schwierigkeitsgrad und tippe den hervorgehobenen Satz so schnell und genau wie möglich.",

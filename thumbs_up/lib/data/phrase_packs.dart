@@ -1,13 +1,8 @@
-import 'package:thumbs_up/data/easy_phrases_en.dart';
-import 'package:thumbs_up/data/easy_phrases_punctuation_numbers_en.dart';
-import 'package:thumbs_up/models/phrase_category.dart';
-
-/// Easy-difficulty phrase pool for each [PhraseCategory].
+/// Phrase-pack entry points for Practice.
 ///
-/// Kept as a plain map (rather than baking category into each screen) so
-/// Medium/Pro ("Speed Stream") can index into the same packs once that mode
-/// ships; only Easy is playable today.
-const Map<PhraseCategory, List<String>> easyPhrasePacks = {
-  PhraseCategory.everyday: easyPhrasesEn,
-  PhraseCategory.punctuationNumbers: easyPhrasesPunctuationNumbersEn,
-};
+/// Everyday lists come from Tatoeba JSON assets via [PhrasePackResolver]
+/// (language follows the UI locale). Punctuation & Numbers stays the
+/// hand-written English list in `easy_phrases_punctuation_numbers_en.dart`.
+library;
+
+export 'package:thumbs_up/data/phrase_pack_resolver.dart';

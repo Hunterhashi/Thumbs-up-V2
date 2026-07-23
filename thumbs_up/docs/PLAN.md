@@ -23,7 +23,7 @@
 - [x] Settings (E): haptics on/off, live HUD on/off, theme mode (system/light/dark)
 - [x] Phrase packs / categories (Easy: Everyday + Punctuation & Numbers, picked on Home)
 - [x] Localization (English + German UI strings + language selector in Settings; phrase content still English-only)
-- [ ] Sentence library (Tatoeba-based, large EN/DE pool, filtered + attributed) — parked under Later tweaks; next content milestone after Speed Stream
+- [x] Sentence library (Tatoeba Everyday EN/DE offline JSON; Punctuation pack remains hand-written EN)
 - [x] Medium/Pro "Speed Stream" (treadmill) mode + scoring, speed tuned on-device
 - [ ] Phrase lists + scoring logic per difficulty (beyond the Easy starter list)
 - [x] Verification: `flutter analyze` clean, widget test passes, app boots/runs
@@ -237,7 +237,7 @@ These are captured as always-on Cursor rules now (see `.cursor/rules/flutter-dar
 - **Wordmark**: replace the `RichText` logo with a final wordmark asset (transparent PNG/SVG, no background) and pick the final typography.
 - **Package/bundle id**: set a final reverse-DNS id before store release.
 - **Speed Stream tuning**: tune scroll speeds after on-device testing; optionally add a 60s toggle.
-- **Sentence library (Tatoeba — next content milestone after Speed Stream)**: replace starter phrase lists with a large EN/DE pool from Tatoeba CC0 (`eng` + `deu`), filtered to Easy constraints (~15–60 chars, conversational, minimal symbols). If CC0 volume is too small, fall back to broader CC BY + an in-app About / Credits attribution screen. Persist the shuffle-once deck index so repeats stay rare.
+- **Sentence library**: Everyday EN/DE Tatoeba pools ship as offline JSON (`assets/phrases/`); regenerate with `dart run tool/build_tatoeba_everyday.dart`. Still pending: German Punctuation pack, persist deck index, optional CC BY About screen polish.
 - **Phrase packs**: consider persisting the last-picked category (like theme mode) and tracking personal bests per `(difficulty, category)` instead of difficulty alone.
 - **Scoring + start UX**: revisit mistake/backspace rules after playtesting; decide if a short countdown or tap-to-start is wanted.
 - **Accessibility**: add reduce-motion fallback for Speed Stream; color-blind safe cues; Dynamic Type sizing.
@@ -341,3 +341,12 @@ These are captured as always-on Cursor rules now (see `.cursor/rules/flutter-dar
   - `ResultScreen`: stream runs show Completed/Missed (+ mistakes/backspaces); primary action is "Play again" (same difficulty+category); Easy keeps Next phrase / Repeat.
   - Localized new strings (`statsTimeLeft`, `resultStatCompleted`, `resultStatMissed`, `resultPlayAgain`) in EN/DE ARBs.
 - `flutter analyze` is clean, `flutter test` passes, and the app boots on macOS desktop with no crashes.
+
+### Session 10
+- Implemented the Tatoeba **sentence library** for Everyday EN/DE (offline assets), scoped 1A/2A/3A.
+  - New `tool/build_tatoeba_everyday.dart`: downloads Tatoeba per-language exports, filters (15–60 chars, no digits, limited punctuation, lowercased), caps at 800/lang, writes `assets/phrases/everyday_{en,de}.json` + `manifest.json`. EN uses CC0; DE CC0 was only ~46 sentences so the script falls back to the full DE export (**CC BY 2.0 FR**) and records that in the manifest.
+  - Registered phrase assets in `pubspec.yaml`; cache dir `tool/.tatoeba_cache/` gitignored.
+  - New `lib/data/phrase_pack_resolver.dart`: loads/caches JSON via `rootBundle`; Everyday language follows UI locale (`de` → DE, else EN); Punctuation & Numbers stays hand-written EN; soft-fallback to `easy_phrases_en.dart` if an asset fails.
+  - `main.dart` prefetches Everyday packs after `SettingsStore.load()`; `PracticeScreen` uses `PhrasePackResolver.phrases` (incl. Restart).
+  - Settings Credits one-liner (localized) attributing Tatoeba EN CC0 / DE CC BY.
+- `flutter analyze` is clean, `flutter test` passes.

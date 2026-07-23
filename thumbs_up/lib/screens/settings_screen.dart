@@ -68,6 +68,14 @@ class SettingsScreen extends StatelessWidget {
                     ),
                   ],
                 ),
+                const SizedBox(height: 24),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    l10n.settingsCredits,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ),
               ],
             );
           },
