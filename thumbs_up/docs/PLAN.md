@@ -33,6 +33,8 @@
 - [x] Schritt 2: Easy Fertigstellung → Results Navigation härten
 - [x] Schritt 3: Easy 30s Phrase-Loop + Slide-Animation
 - [ ] Schritt 4: Pro Timer An/Aus + Speed-Einstellung — **Later tweaks** (kein Code in dieser Welle)
+- [x] Bugfix: Easy advance on typed length (despite typos)
+- [ ] Bugfix: Medium/Pro miss at left edge + clear input + active-word highlight
 
 ## Assumptions (to keep it simple)
 - We'll build with **Flutter** and target **iOS + Android**.
@@ -390,4 +392,8 @@ These are captured as always-on Cursor rules now (see `.cursor/rules/flutter-dar
   - New `AnimatedPhraseStreamView`: old phrase slides up, new phrase enters from below.
   - `ResultScreen`: Easy uses Play again (like Medium/Pro); EN/DE Easy description updated.
 - Medium/Pro Speed Stream untouched.
+- `dart analyze` / `flutter test` pass.
+
+### Session 16
+- Easy line advance no longer requires an exact string match: `isPhraseComplete` is true when typed length reaches the target length. Typos still count toward mistakes/accuracy but do not block progression to the next phrase.
 - `dart analyze` / `flutter test` pass.

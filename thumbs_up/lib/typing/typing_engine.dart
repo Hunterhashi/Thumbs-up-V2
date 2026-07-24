@@ -13,8 +13,8 @@ import 'package:thumbs_up/typing/wpm_calculator.dart';
 /// - Compares typed input to [targetPhrase] character-by-character.
 /// - Counts mistakes (wrong key typed, even if later corrected) and
 ///   backspaces (tracked separately, do not reduce the mistake count).
-/// - On phrase match: exposes [isPhraseComplete] so the UI can advance to
-///   the next phrase without ending the run.
+/// - When typed length reaches the target length: exposes [isPhraseComplete]
+///   so the UI can advance (typos do not block; they still count as mistakes).
 /// - Ends the run when [finishRun] is called (typically after [hasTimedOut]).
 /// - Supports pausing: [elapsed] stops advancing while [isPaused], and
 ///   input is expected to be ignored by the caller during a pause.
@@ -48,9 +48,13 @@ class TypingEngine extends ChangeNotifier {
   /// True when the full 30s run has been finished via [finishRun].
   bool get completed => _completed;
 
-  /// True when the current phrase is fully typed (exact match).
+  /// True when the current phrase has been fully attempted (typed length
+  /// reached the target). Exact match is not required — typos still count
+  /// toward mistakes/accuracy but must not block line advance.
   bool get isPhraseComplete =>
-      _typed.isNotEmpty && _typed == _targetPhrase && !_completed;
+      !_completed &&
+      _targetPhrase.isNotEmpty &&
+      _typed.length >= _targetPhrase.length;
 
   bool get hasTimedOut => _started && elapsed >= runDuration;
 
