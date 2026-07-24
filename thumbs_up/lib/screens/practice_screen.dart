@@ -142,7 +142,16 @@ class _PracticeScreenState extends State<PracticeScreen>
 
   void _onStreamChanged() {
     if (!mounted) return;
-    if (_streamEngine?.completed == true && !_navigatedToResult) {
+    final engine = _streamEngine;
+    if (engine != null && engine.takeNeedsInputClear()) {
+      if (_controller.text.isNotEmpty) {
+        _controller.clear();
+      }
+      if (!_focusNode.hasFocus && !engine.isPaused && !engine.completed) {
+        _focusNode.requestFocus();
+      }
+    }
+    if (engine?.completed == true && !_navigatedToResult) {
       _goToResult();
     } else {
       setState(() {});

@@ -61,6 +61,7 @@ class SpeedStreamEngine extends ChangeNotifier {
   bool _started = false;
   bool _paused = false;
   bool _completed = false;
+  bool _needsInputClear = false;
   double _viewportWidth = 0;
   double Function(String word)? _measureWidth;
 
@@ -145,8 +146,10 @@ class SpeedStreamEngine extends ChangeNotifier {
       token.x -= dx;
     }
 
-    // Miss: active word's left edge has exited the strip.
-    while (_tokens.isNotEmpty && _tokens.first.x + _tokens.first.width < 0) {
+    // Miss (Variant A): active word's left edge reached/passed the clip.
+    // Pixel scroll position is independent of typed-char indexing; on miss
+    // we reset typed state so the next word starts clean.
+    while (_tokens.isNotEmpty && _tokens.first.x <= 0) {
       _missActiveWord();
     }
 
@@ -161,8 +164,14 @@ class SpeedStreamEngine extends ChangeNotifier {
 
   void _missActiveWord() {
     if (_tokens.isEmpty) return;
+    final word = _tokens.first.word;
+    final remaining = word.length - _typed.length;
+    if (remaining > 0) {
+      _mistakes += remaining;
+    }
     _missedWords++;
     _typed = '';
+    _needsInputClear = true;
     _tokens.removeAt(0);
     _ensureTokenWindow();
   }
@@ -172,8 +181,17 @@ class SpeedStreamEngine extends ChangeNotifier {
     _completedWords++;
     _correctChars += _tokens.first.word.length;
     _typed = '';
+    _needsInputClear = true;
     _tokens.removeAt(0);
     _ensureTokenWindow();
+  }
+
+  /// Whether the hidden input should be cleared (after miss or complete).
+  /// Consuming resets the flag so each clear is requested once.
+  bool takeNeedsInputClear() {
+    if (!_needsInputClear) return false;
+    _needsInputClear = false;
+    return true;
   }
 
   /// Call whenever the hidden input field's text changes.

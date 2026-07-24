@@ -66,7 +66,6 @@ class _SpeedStreamViewState extends State<SpeedStreamView> {
                     activeStatuses: widget.engine.buildActiveCharStatuses(),
                     gapPx: widget.engine.gapPx,
                     baseStyle: _baseStyle,
-                    isDark: Theme.of(context).brightness == Brightness.dark,
                   ),
                   size: Size(width, 56),
                 ),
@@ -85,20 +84,17 @@ class _SpeedStreamPainter extends CustomPainter {
     required this.activeStatuses,
     required this.gapPx,
     required this.baseStyle,
-    required this.isDark,
   });
 
   final List<StreamToken> tokens;
   final List<CharStatus> activeStatuses;
   final double gapPx;
   final TextStyle baseStyle;
-  final bool isDark;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final pendingColor = AppColors.appleGray.withValues(alpha: 0.4);
-    final upcomingColor = AppColors.appleGray.withValues(alpha: 0.55);
-    final ink = isDark ? AppColors.pureWhite : AppColors.matteBlack;
+    final pendingColor = AppColors.appleGray.withValues(alpha: 0.35);
+    final upcomingColor = AppColors.appleGray.withValues(alpha: 0.35);
     final centerY = size.height / 2;
 
     for (var i = 0; i < tokens.length; i++) {
@@ -106,12 +102,16 @@ class _SpeedStreamPainter extends CustomPainter {
       final isActive = i == 0;
 
       if (isActive) {
-        _paintActiveWord(canvas, token, centerY, ink, pendingColor);
+        _paintActiveHighlight(canvas, token, centerY, size.height);
+        _paintActiveWord(canvas, token, centerY);
       } else {
         final painter = TextPainter(
           text: TextSpan(
             text: token.word,
-            style: baseStyle.copyWith(color: upcomingColor),
+            style: baseStyle.copyWith(
+              color: upcomingColor,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           textDirection: TextDirection.ltr,
           maxLines: 1,
@@ -137,12 +137,33 @@ class _SpeedStreamPainter extends CustomPainter {
     }
   }
 
+  void _paintActiveHighlight(
+    Canvas canvas,
+    StreamToken token,
+    double centerY,
+    double stripHeight,
+  ) {
+    const padX = 8.0;
+    const padY = 6.0;
+    final rect = RRect.fromRectAndRadius(
+      Rect.fromLTRB(
+        token.x - padX,
+        centerY - stripHeight / 2 + padY,
+        token.right + padX,
+        centerY + stripHeight / 2 - padY,
+      ),
+      const Radius.circular(10),
+    );
+    final fill = Paint()
+      ..color = AppColors.brandYellow.withValues(alpha: 0.88)
+      ..style = PaintingStyle.fill;
+    canvas.drawRRect(rect, fill);
+  }
+
   void _paintActiveWord(
     Canvas canvas,
     StreamToken token,
     double centerY,
-    Color ink,
-    Color pendingColor,
   ) {
     var x = token.x;
     for (var i = 0; i < token.word.length; i++) {
@@ -169,13 +190,16 @@ class _SpeedStreamPainter extends CustomPainter {
           );
         case CharStatus.cursor:
           style = baseStyle.copyWith(
-            color: ink,
+            color: AppColors.matteBlack,
             decoration: TextDecoration.underline,
-            decorationColor: AppColors.brandYellow,
+            decorationColor: AppColors.matteBlack,
             decorationThickness: 2,
           );
         case CharStatus.pending:
-          style = baseStyle.copyWith(color: pendingColor);
+          style = baseStyle.copyWith(
+            color: AppColors.matteBlack,
+            fontWeight: FontWeight.w800,
+          );
       }
 
       final painter = TextPainter(

@@ -34,7 +34,7 @@
 - [x] Schritt 3: Easy 30s Phrase-Loop + Slide-Animation
 - [ ] Schritt 4: Pro Timer An/Aus + Speed-Einstellung — **Later tweaks** (kein Code in dieser Welle)
 - [x] Bugfix: Easy advance on typed length (despite typos)
-- [ ] Bugfix: Medium/Pro miss at left edge + clear input + active-word highlight
+- [x] Bugfix: Medium/Pro miss at left edge + clear input + active-word highlight
 
 ## Assumptions (to keep it simple)
 - We'll build with **Flutter** and target **iOS + Android**.
@@ -396,4 +396,11 @@ These are captured as always-on Cursor rules now (see `.cursor/rules/flutter-dar
 
 ### Session 16
 - Easy line advance no longer requires an exact string match: `isPhraseComplete` is true when typed length reaches the target length. Typos still count toward mistakes/accuracy but do not block progression to the next phrase.
+- `dart analyze` / `flutter test` pass.
+
+### Session 17
+- Medium/Pro Speed Stream miss + focus polish:
+  - Miss when active word left edge `x <= 0` (Variant A); remaining untyped chars added to mistakes; `takeNeedsInputClear` so Practice clears the hidden `TextEditingController` and keeps focus (fixes sticky/red input after a miss).
+  - Active word draws a yellow highlight pill; upcoming words more muted; per-char correct/incorrect still overlaid.
+- Easy path untouched in this session.
 - `dart analyze` / `flutter test` pass.
